@@ -6,7 +6,7 @@ jobs:
   build:
 
     runs-on: ubuntu-20.04
-    container: docker://python:3.9.2-alpine3.13
+    container: docker://python:3.9.2-slim-buster
 
     steps:
     - name: Checkout Project
