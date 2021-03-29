@@ -1,0 +1,21 @@
+name: Tests
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-20.04
+    container: docker://python:3.9.2-alpine3.13
+
+    steps:
+    - name: Checkout Project
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Unit test
+      run: |
+        pytest -vvv
