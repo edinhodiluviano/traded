@@ -1,3 +1,4 @@
+import pydantic
 import sqlalchemy as sa
 
 from .database import Base
@@ -8,6 +9,7 @@ class _AccountBase(NoExtraModel):
     name: str
     postable: bool
     is_active: bool = True
+    parent_id: int = None
 
 
 class AccountCreate(_AccountBase):
@@ -16,6 +18,17 @@ class AccountCreate(_AccountBase):
 
 class Account(_AccountBase, OrmModel):
     id: int
+    children: list
+    parent_id: int = None
+    parent: "Account" = None
+
+    @pydantic.validator("children")
+    def children_must_be_list_of_accounts(cls, v):
+        children = [Account.from_orm(o) for o in v]
+        return children
+
+
+Account.update_forward_refs()
 
 
 class AccountDb(Base):
@@ -25,13 +38,16 @@ class AccountDb(Base):
     name = sa.Column(sa.String, unique=False, index=False, nullable=False)
     postable = sa.Column(sa.Boolean, nullable=False)
     is_active = sa.Column(sa.Boolean, default=True, nullable=False)
-#     parent_id = sa.Column(sa.Integer, sa.ForeignKey("account.id"))
-#     parent = sa.orm.relationship("Account")
+    parent_id = sa.Column(
+        sa.Integer, sa.ForeignKey("account.id"), nullable=True
+    )
+    children = sa.orm.relationship("AccountDb")
 
-#    children = sa.orm.relationship(
-#        "Account",
-#        backref=sa.orm.backref("parent", remote_side=[id]),
-#    )
+    def __repr__(self):
+        return (
+            f"<Account: id={self.id}, name={self.name},"
+            f"children={self.children}>"
+        )
 
 
 @Account.returner
