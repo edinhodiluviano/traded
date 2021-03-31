@@ -28,6 +28,8 @@ def test_db_starts_with_no_accounts(session):
 
 
 def test_create_root(session):
+    test_db_starts_with_no_accounts(session)
+
     # insert
     acc_obj = traded.account.AccountCreate(
         name="root",
@@ -39,3 +41,4 @@ def test_create_root(session):
     accs = traded.account.get(session)
     assert len(accs) == 1
     assert accs[0] == acc
+    return acc
