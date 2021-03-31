@@ -1,4 +1,5 @@
 import pytest
+import sqlalchemy as sa
 
 import traded
 
@@ -73,3 +74,21 @@ def test_root_children(session):
 def test_account_parent(session):
     accs = test_create_account_with_parent(session)
     assert accs[1].parent_id == accs[0].id
+
+
+def test_cant_create_two_accounts_with_the_same_name(session):
+    root = test_create_root(session)
+
+    acc_obj = traded.account.AccountCreate(
+        name="root",
+        postable=False,
+        parent_id=root.id,
+    )
+    with pytest.raises(sa.exc.IntegrityError):
+        _ = traded.account.insert(session, acc_obj)
+
+
+def test_create_default_coa(session):
+    traded.account.create_default_coa(session)
+    accs = traded.account.get(session)
+    assert len(accs) > 15
