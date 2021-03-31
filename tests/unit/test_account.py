@@ -5,8 +5,13 @@ import traded
 
 @pytest.fixture(scope="function")
 def session():
-    session = traded.database.SessionLocal()
-    traded.database.create_tables()
+    engine = traded.database.create_engine(traded.database.DATABASE_URL)
+    SessionLocal = traded.database.sessionmaker(
+        autocommit=False, autoflush=False, bind=engine
+    )
+    session = SessionLocal()
+    traded.database.Base.metadata.create_all(bind=engine)
+
     try:
         yield session
     finally:
