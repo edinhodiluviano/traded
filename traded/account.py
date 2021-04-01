@@ -86,6 +86,7 @@ def create_default_coa(sess: sa.orm.Session):
         Liabilities
             ac. payables
             shares issued
+            retained earnings
         Income/Expense
             trade
             interest
@@ -126,6 +127,11 @@ def create_default_coa(sess: sa.orm.Session):
     )
     shares = insert(sess, shares)
 
+    earns = AccountCreate(
+        name="Retained Earnings", postable=True, parent_id=liab.id
+    )
+    earns = insert(sess, earns)
+
     income = AccountCreate(
         name="Income/Expenses", postable=False, parent_id=root.id
     )
@@ -163,6 +169,7 @@ def create_default_coa(sess: sa.orm.Session):
         liab,
         payb,
         shares,
+        earns,
         income,
         trade,
         pmt,
