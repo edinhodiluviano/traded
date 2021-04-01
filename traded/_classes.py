@@ -17,7 +17,9 @@ class OrmModel(NoExtraModel):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             obj = func(*args, **kwargs)
-            if isinstance(obj, list):
+            if obj is None:
+                obj = None
+            elif isinstance(obj, list):
                 obj = [cls.from_orm(o) for o in obj]
             else:
                 obj = cls.from_orm(obj)
