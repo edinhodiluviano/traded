@@ -1,4 +1,10 @@
-import os
+import pytest
+from fastapi.testclient import TestClient
+
+import traded
 
 
-os.environ["DATABASE_URL"] = "sqlite://"
+@pytest.fixture
+def client():
+    client = TestClient(traded.main.app)
+    yield client
