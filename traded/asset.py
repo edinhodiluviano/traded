@@ -86,7 +86,6 @@ def create_default_assets(sess: sa.orm.Session):
         type_, asset_list = line.split(":")
         for asset_name in asset_list.split(", "):
             asset_name = asset_name.strip()
-            print(f"{asset_name=}; {type_=}")
             asset = AssetCreate(name=asset_name, type=type_)
             asset = insert(sess, asset)
             returns.append(asset)

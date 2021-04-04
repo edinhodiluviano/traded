@@ -19,6 +19,22 @@ def session():
         session.close()
 
 
+@pytest.fixture(scope="module")
+def session_filled():
+    engine = traded.database.create_engine(traded.database.DATABASE_URL)
+    SessionLocal = traded.database.sessionmaker(
+        autocommit=False, autoflush=False, bind=engine
+    )
+    session = SessionLocal()
+    traded.database.Base.metadata.create_all(bind=engine)
+    traded.account.create_default_coa(session)
+
+    try:
+        yield session
+    finally:
+        session.close()
+
+
 def test_should_always_pass():
     pass
 
@@ -92,3 +108,13 @@ def test_create_default_coa(session):
     traded.account.create_default_coa(session)
     accs = traded.account.get(session)
     assert len(accs) > 15
+
+
+def test_get_by_name_with_valid_account(session_filled):
+    account = traded.account.get_by_name(session_filled, account_name="Assets")
+    assert account.name == "Assets"
+
+
+def test_get_by_name_with_invalid_account(session_filled):
+    account = traded.account.get_by_name(session_filled, account_name="ckajc")
+    assert account is None

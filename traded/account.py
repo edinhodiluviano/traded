@@ -57,6 +57,12 @@ def get_by_id(sess: sa.orm.Session, account_id: int):
 
 
 @Account.returner
+def get_by_name(sess: sa.orm.Session, account_name: str):
+    query = sess.query(AccountDb).filter(AccountDb.name == account_name)
+    return query.first()
+
+
+@Account.returner
 def get(sess: sa.orm.Session, offset: int = 0, limit: int = 0):
     query = sess.query(AccountDb)
     if offset > 0:
