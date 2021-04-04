@@ -87,13 +87,6 @@ class Transaction(_TransactionBase, OrmModel):
     timestamp: dt.datetime
     entries: list[Entry]
 
-    @pydantic.validator("entries")
-    def entries_should_have_at_least_one_element(cls, entries):
-        if len(entries) == 0:
-            msg = "Transaction must have at least one entry attached to it"
-            raise ValueError(msg)
-        return entries
-
 
 class TransactionDb(Base):
     __tablename__ = "transaction"

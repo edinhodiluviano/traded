@@ -2,6 +2,7 @@ import datetime as dt
 from decimal import Decimal
 
 import pytest
+import pydantic
 
 import traded
 
@@ -69,3 +70,30 @@ def test_insert_manual_transaction(sess):
     assert transaction.id == 1
     assert len(transaction.entries) == 3
     assert transaction.entries[0].value == Decimal("-1234.58")
+
+
+def test_instantiate_transaction_create_with_no_entries_attached(sess):
+    with pytest.raises(pydantic.ValidationError):
+        traded.transaction.TransactionCreate(
+            entries=[],
+            description="unit testing",
+            datetime=dt.datetime(2021, 4, 3, 22, 0, 0),
+        )
+
+
+def test_instantiate_transaction_create_with_imbalanced_entries(sess):
+    acc_cash = traded.account.get_by_name(sess, "Cash")
+    asset_brl = traded.asset.get_by_name(sess, "BRL")
+    entry1 = traded.transaction.EntryCreate(
+        datetime=dt.datetime(2021, 1, 1, 13, 0, 0),
+        account=acc_cash,
+        value=Decimal("-1234.58"),
+        asset_id=asset_brl.id,
+        qnt=Decimal("-1234.58"),
+    )
+    with pytest.raises(pydantic.ValidationError):
+        traded.transaction.TransactionCreate(
+            entries=[entry1],
+            description="unit testing",
+            datetime=dt.datetime(2021, 4, 3, 22, 0, 0),
+        )
