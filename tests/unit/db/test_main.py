@@ -98,9 +98,14 @@ def test_database_reset_ends_in_the_same_place_as_start(session):
         ef = entries_after[n]
         assert len(eb) == len(ef)
         for k in range(len(eb)):
-            assert eb[k].name == ef[k].name
-            assert eb[k].postable == ef[k].postable
-            assert eb[k].is_active == ef[k].is_active
+            assert len(eb[k]) == len(ef[k])
+            eb[k] = dict(eb[k])
+            ef[k] = dict(ef[k])
+            for field in eb[k].keys():
+                assert field in eb[k]
+                assert field in ef[k]
+                if not field.endswith("id"):
+                    assert eb[k][field] == ef[k][field]
 
 
 def test_database_insert_default_coa(session):
