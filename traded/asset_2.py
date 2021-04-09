@@ -4,8 +4,8 @@ from decimal import Decimal
 
 import sqlalchemy as sa
 from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 
-from ._classes import BaseModel, NoExtraModel
 from .dependencies import get_session
 from .db import models
 
@@ -27,27 +27,17 @@ class _AssetBase(BaseModel):
     name: str
     description: str
     is_active: bool
-    type: str
-
-    # bond
-    bond_expiration: dt.datetime = None
-    bond_value: Decimal = None
+    type: AssetTypes
 
 
-class AssetCreate(_AssetBase):
-    pass
-
-
-class Asset(_AssetBase, NoExtraModel):
+class Asset(_AssetBase):
     id: int
-    opt_underlying: "Asset" = None
-    fut_underlying: "Asset" = None
+
+    class Config:
+        orm_mode = True
 
 
-Asset.update_forward_refs()
-
-
-@router.get("/")
+@router.get("/", response_model=list[Asset])
 def get_all(session: sa.orm.Session = Depends(get_session)):
     assets = session.query(models.Asset).all()
     return assets
