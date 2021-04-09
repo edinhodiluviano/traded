@@ -6,51 +6,48 @@ import traded
 
 @pytest.fixture(scope="function", autouse=True)
 def patch():
-    engine = sa.create_engine(traded.db.DATABASE_URL)
+    engine = sa.create_engine(traded.db.main.DATABASE_URL)
     SessionLocal = sa.orm.sessionmaker(
         autocommit=False, autoflush=False, bind=engine
     )
     traded.db.main.engine = engine
-    traded.db.engine = engine
     traded.db.main.SessionLocal = SessionLocal
-    traded.db.SessionLocal = SessionLocal
     yield engine, SessionLocal
 
 
 def test_assert_patch_is_patching(patch):
     assert traded.db.main.engine is patch[0]
-    assert traded.db.SessionLocal is patch[1]
-    assert traded.db.engine is traded.db.main.engine
+    assert traded.db.main.SessionLocal is patch[1]
 
 
 def test_database_starts_with_no_tables():
     m = sa.MetaData()
-    m.reflect(traded.db.engine)
+    m.reflect(traded.db.main.engine)
     assert len(m.tables) == 0
 
 
 def test_database_create_tables():
     m = sa.MetaData()
-    m.reflect(traded.db.engine)
+    m.reflect(traded.db.main.engine)
     assert len(m.tables) == 0
     traded.db.main.create_tables()
-    m.reflect(traded.db.engine)
+    m.reflect(traded.db.main.engine)
     assert len(m.tables) > 0
 
 
 def test_database_create_tables_second_run():
     """Asserts above test is not flaky"""
     m = sa.MetaData()
-    m.reflect(traded.db.engine)
+    m.reflect(traded.db.main.engine)
     assert len(m.tables) == 0
     traded.db.main.create_tables()
-    m.reflect(traded.db.engine)
+    m.reflect(traded.db.main.engine)
     assert len(m.tables) > 0
 
 
 @pytest.fixture(scope="function")
 def session(patch):
-    session = traded.db.SessionLocal()
+    session = traded.db.main.SessionLocal()
     try:
         yield session
     finally:
@@ -59,7 +56,7 @@ def session(patch):
 
 def tables():
     m = sa.MetaData()
-    m.reflect(traded.db.engine)
+    m.reflect(traded.db.main.engine)
     t = list(m.tables.values())
     return t
 
@@ -90,10 +87,10 @@ def test_database_clear_delete_entries(session):
 
 
 def test_database_reset_ends_in_the_same_place_as_start(session):
-    traded.db.setup(session)
+    traded.db.main.setup(session)
     entries_before = [session.query(table).all() for table in tables()]
     assert len(entries_before) > 0
-    traded.db.reset(session)
+    traded.db.main.reset(session)
     entries_after = [session.query(table).all() for table in tables()]
     assert len(entries_before) == len(entries_after)
     for n in range(len(entries_before)):
@@ -107,6 +104,6 @@ def test_database_reset_ends_in_the_same_place_as_start(session):
 
 
 def test_database_insert_default_coa(session):
-    traded.db.setup(session)
+    traded.db.main.setup(session)
     accounts = session.query(traded.db.models.Account).all()
     assert len(accounts) == 18
