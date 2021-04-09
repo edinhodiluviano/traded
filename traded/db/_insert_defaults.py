@@ -82,29 +82,6 @@ def _insert_default_assets(session: sa.orm.Session):
         ("XMR", "Monero", True, "currency"),
         ("ADA", "Cardano", True, "currency"),
         ("USDT", "Tether", True, "currency"),
-        # indexes
-        ("SP500", "S&P 500", True, "index"),
-        ("NASDAQ", "Nasdaq", True, "index"),
-        ("IBOVESPA", "Ibovespa", True, "index"),
-        ("DJIA", "Down Jones Industrial Average", True, "index"),
-        ("VIX", "CBOE Volatility Index", True, "index"),
-        # rates
-        dict(
-            name="fed_funds",
-            description="Fed Fund Rates",
-            is_active=True,
-            type="rate",
-            rate_frequency="daily",
-            rate_day_count="Actual/360",
-        ),
-        dict(
-            name="br_cdi",
-            description="Certificado de Deposito Interbancario - BRL",
-            is_active=True,
-            type="rate",
-            rate_frequency="daily",
-            rate_day_count="252",
-        ),
     ]
 
     for asset_item in assets:
