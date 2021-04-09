@@ -4,7 +4,13 @@ import sqlalchemy as sa
 Base = sa.ext.declarative.declarative_base()
 
 
-class Account(Base):
+class ReprMixin:
+    def __repr__(self):
+        r = f"<DB:{self.__class__.__name__}: name={self.name}; id={self.id}>"
+        return r
+
+
+class Account(Base, ReprMixin):
     __tablename__ = "account"
 
     id = sa.Column(sa.Integer, primary_key=True, index=True)
@@ -18,7 +24,7 @@ class Account(Base):
     parent = sa.orm.relationship("Account")
 
 
-class Asset(Base):
+class Asset(Base, ReprMixin):
     """
     The retricted fields are defined in traded.asset enum classes
     traded.asset.AssetTypes:
