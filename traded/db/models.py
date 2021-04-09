@@ -33,7 +33,7 @@ class Asset(Base):
     id = sa.Column(sa.Integer, primary_key=True, index=True)
     name = sa.Column(sa.String, unique=True, index=True, nullable=False)
     description = sa.Column(sa.String, index=False, nullable=False)
-    is_active = sa.Column(sa.Boolean, default=True, nullable=False)
+    is_active = sa.Column(sa.Boolean, default=True, index=True, nullable=False)
     type = sa.Column(sa.String, unique=False, index=True, nullable=False)
 
     # type specific fields
