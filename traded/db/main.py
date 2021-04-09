@@ -27,7 +27,7 @@ def create_tables():
 
 def populate(session: sa.orm.Session):
     "Insert basic entries"
-    _create_default_coa(session)
+    _insert_default_coa(session)
 
 
 def clear(session: sa.orm.Session):
@@ -43,7 +43,7 @@ def reset(session: sa.orm.Session):
     populate(session)
 
 
-def _create_default_coa(session: sa.orm.Session):  # noqa: C901
+def _insert_default_coa(session: sa.orm.Session):  # noqa: C901 - too complex
     coa = {
         "root": [
             {
