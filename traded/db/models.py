@@ -19,6 +19,17 @@ class Account(Base):
 
 
 class Asset(Base):
+    """
+    The types allowed are defined in traded.asset.AssetTypes.
+        currency
+        stock
+        fund
+        option
+        future
+        index
+        bond
+    """
+
     __tablename__ = "asset"
 
     id = sa.Column(sa.Integer, primary_key=True, index=True)
