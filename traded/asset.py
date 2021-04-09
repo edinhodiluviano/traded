@@ -13,6 +13,7 @@ class AssetTypes(str, Enum):
     option = "option"
     future = "future"
     index = "index"
+    bond = "bond"
 
 
 class _AssetBase(NoExtraModel):
@@ -69,3 +70,24 @@ def edit(sess: sa.orm.Session, asset_id: int, field: str, new_value):
     setattr(asset, field, new_value)
     sess.commit()
     return asset
+
+
+def create_default_assets(sess: sa.orm.Session):
+    assets = """
+    currency: USD, EUR, BRL, JPY, CNY, BTC, ETH, USDT, ADA, XRP
+    index: S&P500, Nasdaq, DJI, IBOV, USD_CPI, BRL_IPCA, FED_RATE, SELIC
+    """
+
+    returns = []
+    for line in assets.split("\n"):
+        line = line.strip()
+        if line == "":
+            continue
+        type_, asset_list = line.split(":")
+        for asset_name in asset_list.split(", "):
+            asset_name = asset_name.strip()
+            asset = AssetCreate(name=asset_name, type=type_)
+            asset = insert(sess, asset)
+            returns.append(asset)
+
+    return returns

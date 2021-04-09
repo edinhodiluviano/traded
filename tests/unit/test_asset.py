@@ -75,3 +75,8 @@ def test_asset_edit(sess):
 def test_get_with_non_existing_name(sess):
     asset = traded.asset.get_by_name(sess, name="xxx")
     assert asset is None
+
+
+def test_create_default_assets(sess):
+    assets = traded.asset.create_default_assets(sess)
+    assert len(assets) >= 18
