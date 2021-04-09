@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from . import account_2 as account
+from . import asset_2 as asset
 
 
 app = FastAPI()
@@ -12,3 +13,4 @@ async def root():
 
 
 app.include_router(account.router)
+app.include_router(asset.router)

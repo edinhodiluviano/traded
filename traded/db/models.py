@@ -16,3 +16,13 @@ class Account(Base):
     )
 
     parent = sa.orm.relationship("Account")
+
+
+class Asset(Base):
+    __tablename__ = "asset"
+
+    id = sa.Column(sa.Integer, primary_key=True, index=True)
+    name = sa.Column(sa.String, unique=True, index=True, nullable=False)
+    description = sa.Column(sa.String, index=False, nullable=False)
+    is_active = sa.Column(sa.Boolean, default=True, nullable=False)
+    type = sa.Column(sa.String, unique=False, index=True, nullable=False)
