@@ -8,3 +8,13 @@ def test_asset_get_all(client):
 def test_asset_default_database(client):
     resp = client.get("/asset")
     assert len(resp.json()) > 0
+
+
+def test_returned_assets_have_basic_fields(client):
+    resp = client.get("/asset")
+    for asset in resp.json():
+        assert isinstance(asset, dict)
+        assert "name" in asset
+        assert "id" in asset
+        assert "type" in asset
+        assert "is_active" in asset
