@@ -1,9 +1,7 @@
 from enum import Enum
-import datetime as dt
-from decimal import Decimal
 
 import sqlalchemy as sa
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Path
 from pydantic import BaseModel
 
 from .dependencies import get_session
@@ -41,3 +39,13 @@ class Asset(_AssetBase):
 def get_all(session: sa.orm.Session = Depends(get_session)):
     assets = session.query(models.Asset).all()
     return assets
+
+
+@router.get("/{asset_id}", response_model=Asset)
+def get_by_id(
+    asset_id: int = Path(..., ge=1),
+    session: sa.orm.Session = Depends(get_session),
+):
+    query = session.query(models.Asset)
+    asset = query.filter(models.Asset.id == asset_id).first()
+    return asset
