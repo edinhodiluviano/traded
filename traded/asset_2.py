@@ -35,20 +35,6 @@ class Asset(_AssetBase):
         orm_mode = True
 
 
-class CurrencyCreate(_AssetBase):
-    type: AssetTypes = AssetTypes.currency
-
-    class Config:
-        extra = "forbid"
-
-
-class Currency(CurrencyCreate):
-    id: int
-
-    class Config:
-        orm_mode = True
-
-
 @router.get("/a", response_model=list[Asset])
 def get_all(session: sa.orm.Session = Depends(get_session)):
     assets = session.query(models.Asset).all()
@@ -63,6 +49,20 @@ def get_by_id(
     query = session.query(models.Asset)
     asset = query.filter(models.Asset.id == asset_id).first()
     return asset
+
+
+class CurrencyCreate(_AssetBase):
+    type: AssetTypes = AssetTypes.currency
+
+    class Config:
+        extra = "forbid"
+
+
+class Currency(CurrencyCreate):
+    id: int
+
+    class Config:
+        orm_mode = True
 
 
 @router.post("/currency", response_model=Currency)
@@ -92,6 +92,55 @@ def update_currency(
 ):
     asset = session.query(models.Asset).get(asset_id)
     for field, value in currency.dict().items():
+        if field == "id":
+            continue
+        setattr(asset, field, value)
+    session.commit()
+    session.refresh(asset)
+    return asset
+
+
+class StockCreate(_AssetBase):
+    type: AssetTypes = AssetTypes.stock
+
+    class Config:
+        extra = "forbid"
+
+
+class Stock(StockCreate):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+
+@router.post("/stock", response_model=Stock)
+def create_stock(
+    stock: StockCreate,
+    session: sa.orm.Session = Depends(get_session),
+):
+    stock_db = models.Asset(**stock.dict())
+    session.add(stock_db)
+    session.commit()
+    session.refresh(stock_db)
+    return stock_db
+
+
+@router.get("/stock", response_model=list[Stock])
+def get_all_stocks(session: sa.orm.Session = Depends(get_session)):
+    query = session.query(models.Asset)
+    stocks = query.filter(models.Asset.type == AssetTypes.stock).all()
+    return stocks
+
+
+@router.put("/stock/{asset_id}", response_model=Stock)
+def update_stock(
+    stock: StockCreate,
+    asset_id: int = Path(..., ge=1),
+    session: sa.orm.Session = Depends(get_session),
+):
+    asset = session.query(models.Asset).get(asset_id)
+    for field, value in stock.dict().items():
         if field == "id":
             continue
         setattr(asset, field, value)

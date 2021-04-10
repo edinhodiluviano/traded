@@ -106,3 +106,71 @@ def test_edit_currency(client):
     for field in ["id", "name"]:
         assert resp2.json()[field] == new_curr[field]
     assert resp2.json()["description"] == "aaa"
+
+
+def create_new_stock(client):
+    name = str(uuid.uuid4())
+    new_currency = dict(
+        name=name,
+        description=name,
+        is_active=True,
+    )
+    return name, client.post("/asset/stock", json=new_currency)
+
+
+def test_create_new_stock(client):
+    name, resp = create_new_stock(client)
+    assert resp.status_code == 200
+    assert "id" in resp.json()
+    assert "name" in resp.json()
+    assert resp.json()["name"] == name
+
+
+def test_create_new_stock_with_missing_data(client):
+    name = str(uuid.uuid4())
+    new_currency = dict(
+        name=name,
+        is_active=True,
+    )
+    resp = client.post("/asset/stock", json=new_currency)
+    assert resp.status_code == 422
+
+
+def test_create_new_stock_with_extra_data(client):
+    name = str(uuid.uuid4())
+    new_currency = dict(
+        name=name,
+        description=name,
+        is_active=True,
+        bogus_field_123="cksdmcs",
+    )
+    resp = client.post("/asset/stock", json=new_currency)
+    assert resp.status_code == 422
+
+
+def test_get_all_stocks(client):
+    for i in range(5):
+        create_new_stock(client)
+    resp = client.get("/asset/stock")
+    assert resp.status_code == 200
+    assert isinstance(resp.json(), list)
+    assert len(resp.json()) > 5
+    for cur in resp.json():
+        assert "type" in cur
+        assert cur["type"] == "stock"
+
+
+def test_edit_stocks(client):
+    name = str(uuid.uuid4())
+    new_asset = dict(name=name, description="", is_active=True)
+    resp = client.post("/asset/stock", json=new_asset)
+    new_asset = resp.json()
+    edited_asset = copy.deepcopy(new_asset)
+    edited_asset["description"] = "aaa"
+    del edited_asset["id"]
+    resp2 = client.put(f"asset/stock/{new_asset['id']}", json=edited_asset)
+    assert resp2.status_code == 200
+    assert isinstance(resp2.json(), dict)
+    for field in ["id", "name"]:
+        assert resp2.json()[field] == new_asset[field]
+    assert resp2.json()["description"] == "aaa"
