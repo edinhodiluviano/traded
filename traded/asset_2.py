@@ -35,13 +35,13 @@ class Asset(_AssetBase):
         orm_mode = True
 
 
-@router.get("/a", response_model=list[Asset])
+@router.get("/all", response_model=list[Asset])
 def get_all(session: sa.orm.Session = Depends(get_session)):
     assets = session.query(models.Asset).all()
     return assets
 
 
-@router.get("/a/{asset_id}", response_model=Asset)
+@router.get("/all/{asset_id}", response_model=Asset)
 def get_by_id(
     asset_id: int = Path(..., ge=1),
     session: sa.orm.Session = Depends(get_session),
