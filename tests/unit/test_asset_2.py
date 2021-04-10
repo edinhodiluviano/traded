@@ -70,6 +70,19 @@ def test_create_new_currency_with_missing_data(client):
     assert resp.status_code == 422
 
 
+def test_create_new_currency_with_dupe_name(client):
+    name = str(uuid.uuid4())
+    new_currency = dict(
+        name=name,
+        description="lcamds",
+        is_active=True,
+    )
+    resp = client.post("/asset/currency", json=new_currency)
+    assert resp.status_code == 200
+    resp = client.post("/asset/currency", json=new_currency)
+    assert resp.status_code == 422
+
+
 def test_create_new_currency_with_extra_data(client):
     name = str(uuid.uuid4())
     new_currency = dict(
