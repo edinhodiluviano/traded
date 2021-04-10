@@ -65,7 +65,7 @@ class Stock(StockCreate):
 
 
 @router.get("/all", response_model=list[Asset])
-def get_all(session: sa.orm.Session = Depends(get_session)):
+def get_all_assets(session: sa.orm.Session = Depends(get_session)):
     assets = session.query(models.Asset).all()
     return assets
 
