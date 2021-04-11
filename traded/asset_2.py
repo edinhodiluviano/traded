@@ -64,27 +64,14 @@ class Stock(StockCreate):
         orm_mode = True
 
 
-@router.get("/all", response_model=list[Asset])
+@router.get("/", response_model=list[Asset])
 def get_all_assets(session: sa.orm.Session = Depends(get_session)):
-    assets = session.query(models.Asset).all()
+    query = session.query(models.Asset)
+    assets = query.all()
     return assets
 
 
-@router.get("/currency", response_model=list[Currency])
-def get_all_currencies(session: sa.orm.Session = Depends(get_session)):
-    query = session.query(models.Asset)
-    currencies = query.filter(models.Asset.type == AssetTypes.currency).all()
-    return currencies
-
-
-@router.get("/stock", response_model=list[Stock])
-def get_all_stocks(session: sa.orm.Session = Depends(get_session)):
-    query = session.query(models.Asset)
-    stocks = query.filter(models.Asset.type == AssetTypes.stock).all()
-    return stocks
-
-
-@router.get("/all/{asset_id}", response_model=Asset)
+@router.get("/{asset_id}", response_model=Asset)
 def get_by_id(
     asset_id: int = Path(..., ge=1),
     session: sa.orm.Session = Depends(get_session),
@@ -111,22 +98,6 @@ def create_currency(
         return currency_db
 
 
-@router.put("/currency/{asset_id}", response_model=Currency)
-def update_currency(
-    currency: CurrencyCreate,
-    asset_id: int = Path(..., ge=1),
-    session: sa.orm.Session = Depends(get_session),
-):
-    asset = session.query(models.Asset).get(asset_id)
-    for field, value in currency.dict().items():
-        if field == "id":
-            continue
-        setattr(asset, field, value)
-    session.commit()
-    session.refresh(asset)
-    return asset
-
-
 @router.post("/stock", response_model=Stock)
 def create_stock(
     stock: StockCreate,
@@ -139,6 +110,20 @@ def create_stock(
     return stock_db
 
 
+@router.put("/currency/{asset_id}", response_model=Currency)
+def update_currency(
+    currency: CurrencyCreate,
+    asset_id: int = Path(..., ge=1),
+    session: sa.orm.Session = Depends(get_session),
+):
+    asset = session.query(models.Asset).get(asset_id)
+    for field, value in currency.dict().items():
+        setattr(asset, field, value)
+    session.commit()
+    session.refresh(asset)
+    return asset
+
+
 @router.put("/stock/{asset_id}", response_model=Stock)
 def update_stock(
     stock: StockCreate,
@@ -147,8 +132,6 @@ def update_stock(
 ):
     asset = session.query(models.Asset).get(asset_id)
     for field, value in stock.dict().items():
-        if field == "id":
-            continue
         setattr(asset, field, value)
     session.commit()
     session.refresh(asset)

@@ -3,19 +3,19 @@ import copy
 
 
 def test_asset_get_all(client):
-    resp = client.get("/asset/all")
+    resp = client.get("/asset")
     assert resp.status_code == 200
     assets = resp.json()
     assert isinstance(assets, list)
 
 
 def test_asset_default_database(client):
-    resp = client.get("/asset/all")
+    resp = client.get("/asset")
     assert len(resp.json()) > 0
 
 
 def test_returned_assets_have_basic_fields(client):
-    resp = client.get("/asset/all")
+    resp = client.get("/asset")
     for asset in resp.json():
         assert isinstance(asset, dict)
         assert "name" in asset
@@ -25,23 +25,23 @@ def test_returned_assets_have_basic_fields(client):
 
 
 def test_get_by_id(client):
-    resp = client.get("/asset/all/1")
+    resp = client.get("/asset/1")
     assert resp.status_code == 200
     assert resp.json()["id"] == 1
 
 
 def test_get_by_id_with_str_as_id(client):
-    resp = client.get("/asset/all/xxxx")
+    resp = client.get("/asset/xxxx")
     assert resp.status_code == 422
 
 
 def test_get_by_id_with_negative_id(client):
-    resp = client.get("/asset/all/-1")
+    resp = client.get("/asset/-1")
     assert resp.status_code == 422
 
 
 def test_get_by_id_with_non_existing_id(client):
-    resp = client.get("/asset/all/9999999")
+    resp = client.get("/asset/9999999")
     assert resp.status_code == 200
     assert resp.json() is None
 
@@ -93,16 +93,6 @@ def test_create_new_currency_with_extra_data(client):
     )
     resp = client.post("/asset/currency", json=new_currency)
     assert resp.status_code == 422
-
-
-def test_get_all_currencies(client):
-    resp = client.get("/asset/currency")
-    assert resp.status_code == 200
-    assert isinstance(resp.json(), list)
-    assert len(resp.json()) > 5
-    for cur in resp.json():
-        assert "type" in cur
-        assert cur["type"] == "currency"
 
 
 def test_edit_currency(client):
@@ -159,18 +149,6 @@ def test_create_new_stock_with_extra_data(client):
     )
     resp = client.post("/asset/stock", json=new_currency)
     assert resp.status_code == 422
-
-
-def test_get_all_stocks(client):
-    for i in range(5):
-        create_new_stock(client)
-    resp = client.get("/asset/stock")
-    assert resp.status_code == 200
-    assert isinstance(resp.json(), list)
-    assert len(resp.json()) > 5
-    for cur in resp.json():
-        assert "type" in cur
-        assert cur["type"] == "stock"
 
 
 def test_edit_stocks(client):
