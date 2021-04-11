@@ -36,6 +36,23 @@ class Asset(_AssetBase):
         orm_mode = True
 
 
+@router.get("/", response_model=list[Asset])
+def get_all_assets(session: sa.orm.Session = Depends(get_session)):
+    query = session.query(models.Asset)
+    assets = query.all()
+    return assets
+
+
+@router.get("/{asset_id}", response_model=Asset)
+def get_by_id(
+    asset_id: int = Path(..., ge=1),
+    session: sa.orm.Session = Depends(get_session),
+):
+    query = session.query(models.Asset)
+    asset = query.filter(models.Asset.id == asset_id).first()
+    return asset
+
+
 class CurrencyCreate(_AssetBase):
     type: AssetTypes = AssetTypes.currency
 
@@ -62,23 +79,6 @@ class Stock(StockCreate):
 
     class Config:
         orm_mode = True
-
-
-@router.get("/", response_model=list[Asset])
-def get_all_assets(session: sa.orm.Session = Depends(get_session)):
-    query = session.query(models.Asset)
-    assets = query.all()
-    return assets
-
-
-@router.get("/{asset_id}", response_model=Asset)
-def get_by_id(
-    asset_id: int = Path(..., ge=1),
-    session: sa.orm.Session = Depends(get_session),
-):
-    query = session.query(models.Asset)
-    asset = query.filter(models.Asset.id == asset_id).first()
-    return asset
 
 
 @router.post("/currency", response_model=Currency)
