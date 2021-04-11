@@ -165,3 +165,59 @@ def test_edit_stocks(client):
     for field in ["id", "name"]:
         assert resp2.json()[field] == new_asset[field]
     assert resp2.json()["description"] == "aaa"
+
+
+def create_new_fund(client):
+    name = str(uuid.uuid4())
+    new_currency = dict(
+        name=name,
+        description=name,
+        is_active=True,
+    )
+    return name, client.post("/asset/fund", json=new_currency)
+
+
+def test_create_new_fund(client):
+    name, resp = create_new_fund(client)
+    assert resp.status_code == 200
+    assert "id" in resp.json()
+    assert "name" in resp.json()
+    assert resp.json()["name"] == name
+
+
+def test_create_new_fund_with_missing_data(client):
+    name = str(uuid.uuid4())
+    new_currency = dict(
+        name=name,
+        is_active=True,
+    )
+    resp = client.post("/asset/fund", json=new_currency)
+    assert resp.status_code == 422
+
+
+def test_create_new_fund_with_extra_data(client):
+    name = str(uuid.uuid4())
+    new_currency = dict(
+        name=name,
+        description=name,
+        is_active=True,
+        bogus_field_123="cksdmcs",
+    )
+    resp = client.post("/asset/fund", json=new_currency)
+    assert resp.status_code == 422
+
+
+def test_edit_funds(client):
+    name = str(uuid.uuid4())
+    new_asset = dict(name=name, description="", is_active=True)
+    resp = client.post("/asset/fund", json=new_asset)
+    new_asset = resp.json()
+    edited_asset = copy.deepcopy(new_asset)
+    edited_asset["description"] = "aaa"
+    del edited_asset["id"]
+    resp2 = client.put(f"asset/fund/{new_asset['id']}", json=edited_asset)
+    assert resp2.status_code == 200
+    assert isinstance(resp2.json(), dict)
+    for field in ["id", "name"]:
+        assert resp2.json()[field] == new_asset[field]
+    assert resp2.json()["description"] == "aaa"

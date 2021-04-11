@@ -53,6 +53,14 @@ class Stock(_AssetBase):
     id: int
 
 
+class FundCreate(_AssetBase):
+    pass
+
+
+class Fund(_AssetBase):
+    id: int
+
+
 @router.get("/", response_model=list[Asset])
 def get_all_assets(session: sa.orm.Session = Depends(get_session)):
     query = session.query(models.Asset)
@@ -148,3 +156,4 @@ def endpoints_factory(
 
 endpoints_factory(AssetTypes.currency, CurrencyCreate, Currency)
 endpoints_factory(AssetTypes.stock, CurrencyCreate, Currency)
+endpoints_factory(AssetTypes.fund, FundCreate, Fund)
