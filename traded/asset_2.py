@@ -70,6 +70,14 @@ def get_by_id(
     return asset
 
 
+def try_to_commit(session: sa.orm.Session):
+    try:
+        session.commit()
+    except sa.exc.IntegrityError:
+        session.rollback()
+        raise HTTPException(status_code=422, detail=tb.format_exc(limit=0))
+
+
 def create_asset_factory(
     asset_type: AssetTypes,
     asset_create_class: _AssetBase,
@@ -82,14 +90,9 @@ def create_asset_factory(
         asset_dict["type"] = asset_type.value
         asset_db = models.Asset(**asset_dict)
         session.add(asset_db)
-        try:
-            session.commit()
-        except sa.exc.IntegrityError:
-            session.rollback()
-            raise HTTPException(status_code=422, detail=tb.format_exc(limit=0))
-        else:
-            session.refresh(asset_db)
-            return asset_db
+        try_to_commit(session)
+        session.refresh(asset_db)
+        return asset_db
 
     create_asset.__name__ = f"Create {asset_type.value.title()}"
     create_asset.__doc__ = (
@@ -110,14 +113,9 @@ def update_asset_factory(
         asset_db = session.query(models.Asset).get(asset_id)
         for field, value in asset_update.dict().items():
             setattr(asset_db, field, value)
-        try:
-            session.commit()
-        except sa.exc.IntegrityError:
-            session.rollback()
-            raise HTTPException(status_code=422, detail=tb.format_exc(limit=0))
-        else:
-            session.refresh(asset_db)
-            return asset_db
+        try_to_commit(session)
+        session.refresh(asset_db)
+        return asset_db
 
     update_asset.__name__ = f"Update {asset_type.value.title()}"
     update_asset.__doc__ = f"Updates a single {asset_type.value.title()}"
