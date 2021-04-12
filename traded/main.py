@@ -4,6 +4,7 @@ from fastapi import FastAPI, Depends
 from . import db
 from . import account_2 as account
 from . import asset_2 as asset
+from . import transaction_2 as transaction
 from .dependencies import get_session
 
 
@@ -28,3 +29,4 @@ def db_setup(session: sa.orm.Session = Depends(get_session)):
 
 app.include_router(account.router)
 app.include_router(asset.router)
+app.include_router(transaction.router)
