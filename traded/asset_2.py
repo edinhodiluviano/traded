@@ -1,8 +1,10 @@
+import datetime as dt
 from enum import Enum
 import traceback as tb
+from typing import Optional
 
 import sqlalchemy as sa
-from pydantic import BaseModel
+from pydantic import BaseModel, condecimal
 from fastapi import APIRouter, Depends, Path, HTTPException
 
 from .dependencies import get_session
@@ -36,6 +38,9 @@ class Asset(_AssetBase):
     id: int
     type: AssetTypes
 
+    bond_expiration: Optional[dt.datetime]
+    bond_value: Optional[condecimal(decimal_places=10)]
+
 
 class CurrencyCreate(_AssetBase):
     pass
@@ -58,6 +63,15 @@ class FundCreate(_AssetBase):
 
 
 class Fund(_AssetBase):
+    id: int
+
+
+class BondCreate(_AssetBase):
+    bond_expiration: Optional[dt.datetime]
+    bond_value: Optional[condecimal(decimal_places=10)]
+
+
+class Bond(BondCreate):
     id: int
 
 
@@ -157,3 +171,4 @@ def endpoints_factory(
 endpoints_factory(AssetTypes.currency, CurrencyCreate, Currency)
 endpoints_factory(AssetTypes.stock, CurrencyCreate, Currency)
 endpoints_factory(AssetTypes.fund, FundCreate, Fund)
+endpoints_factory(AssetTypes.bond, BondCreate, Bond)

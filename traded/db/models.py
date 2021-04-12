@@ -45,4 +45,8 @@ class Asset(Base, ReprMixin):
     # type specific fields
     # bond
     bond_expiration = sa.Column(sa.DateTime, index=False, nullable=True)
-    bond_value = sa.Numeric(precision=20, scale=10, asdecimal=True)
+    bond_value = sa.Column(
+        sa.Numeric(precision=20, scale=10, asdecimal=True),
+        index=False,
+        nullable=True,
+    )
