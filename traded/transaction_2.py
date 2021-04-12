@@ -1,12 +1,11 @@
 import datetime as dt
-import traceback as tb
 
 import sqlalchemy as sa
 from pydantic import condecimal, validator
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
 from .dependencies import get_session
-from .db import models
+from . import db
 from ._classes import NoExtraModel
 
 
@@ -59,14 +58,6 @@ class Transaction(TransactionCreate):
     value: condecimal(decimal_places=10)
 
 
-def try_to_commit(session: sa.orm.Session):
-    try:
-        session.commit()
-    except sa.exc.IntegrityError:
-        session.rollback()
-        raise HTTPException(status_code=422, detail=tb.format_exc(limit=0))
-
-
 @router.post("/transaction", tags=["transaction"], response_model=Transaction)
 def create_transaction(
     transaction: TransactionCreate,
@@ -74,12 +65,12 @@ def create_transaction(
 ):
 
     entries = [
-        models.Entry(**entry.dict(), datetime=transaction.datetime)
+        db.models.Entry(**entry.dict(), datetime=transaction.datetime)
         for entry in transaction.entries
     ]
     entries_value = sum([entry.value for entry in entries if entry.value > 0])
 
-    transaction_db = models.Transaction(
+    transaction_db = db.models.Transaction(
         datetime=transaction.datetime,
         timestamp=dt.datetime.utcnow(),
         value=entries_value,
@@ -87,6 +78,6 @@ def create_transaction(
         entries=entries,
     )
     session.add(transaction_db)
-    try_to_commit(session)
+    db.main.try_to_commit(session)
     session.refresh(transaction_db)
     return transaction_db

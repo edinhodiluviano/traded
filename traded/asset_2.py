@@ -1,14 +1,13 @@
 import datetime as dt
 from enum import Enum
-import traceback as tb
 from typing import Optional
 
 import sqlalchemy as sa
 from pydantic import BaseModel, condecimal
-from fastapi import APIRouter, Depends, Path, HTTPException
+from fastapi import APIRouter, Depends, Path
 
 from .dependencies import get_session
-from .db import models
+from . import db
 
 
 router = APIRouter(
@@ -77,7 +76,7 @@ class Bond(BondCreate):
 
 @router.get("/", response_model=list[Asset])
 def get_all_assets(session: sa.orm.Session = Depends(get_session)):
-    query = session.query(models.Asset)
+    query = session.query(db.models.Asset)
     assets = query.all()
     return assets
 
@@ -87,17 +86,9 @@ def get_by_id(
     asset_id: int = Path(..., ge=1),
     session: sa.orm.Session = Depends(get_session),
 ):
-    query = session.query(models.Asset)
-    asset = query.filter(models.Asset.id == asset_id).first()
+    query = session.query(db.models.Asset)
+    asset = query.filter(db.models.Asset.id == asset_id).first()
     return asset
-
-
-def try_to_commit(session: sa.orm.Session):
-    try:
-        session.commit()
-    except sa.exc.IntegrityError:
-        session.rollback()
-        raise HTTPException(status_code=422, detail=tb.format_exc(limit=0))
 
 
 def create_asset_factory(
@@ -110,9 +101,9 @@ def create_asset_factory(
     ):
         asset_dict = asset_create.dict()
         asset_dict["type"] = asset_type.value
-        asset_db = models.Asset(**asset_dict)
+        asset_db = db.models.Asset(**asset_dict)
         session.add(asset_db)
-        try_to_commit(session)
+        db.main.try_to_commit(session)
         session.refresh(asset_db)
         return asset_db
 
@@ -132,10 +123,10 @@ def update_asset_factory(
         asset_update: asset_create_class,
         session: sa.orm.Session = Depends(get_session),
     ):
-        asset_db = session.query(models.Asset).get(asset_id)
+        asset_db = session.query(db.models.Asset).get(asset_id)
         for field, value in asset_update.dict().items():
             setattr(asset_db, field, value)
-        try_to_commit(session)
+        db.main.try_to_commit(session)
         session.refresh(asset_db)
         return asset_db
 

@@ -1,6 +1,8 @@
 import os as _os
+import traceback as tb
 
 import sqlalchemy as sa
+from fastapi import HTTPException
 
 from . import models, _insert_defaults
 
@@ -41,3 +43,11 @@ def reset(session: sa.orm.Session):
     "Delete entries for all tables insert basic entries"
     clear(session)
     populate(session)
+
+
+def try_to_commit(session: sa.orm.Session):
+    try:
+        session.commit()
+    except sa.exc.IntegrityError:
+        session.rollback()
+        raise HTTPException(status_code=422, detail=tb.format_exc(limit=0))
