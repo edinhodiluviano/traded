@@ -81,3 +81,14 @@ def create_transaction(
     db.main.try_to_commit(session)
     session.refresh(transaction_db)
     return transaction_db
+
+
+@router.get(
+    "/transaction",
+    tags=["transaction"],
+    response_model=list[Transaction],
+)
+def get_transaction(session: sa.orm.Session = Depends(get_session)):
+    query = session.query(db.models.Transaction)
+    transactions = query.all()
+    return transactions
