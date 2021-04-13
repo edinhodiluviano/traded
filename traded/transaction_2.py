@@ -9,7 +9,10 @@ from . import db
 from ._classes import NoExtraModel
 
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/transaction",
+    tags=["transaction"],
+)
 
 
 class EntryCreate(NoExtraModel):
@@ -58,7 +61,7 @@ class Transaction(TransactionCreate):
     value: condecimal(decimal_places=10)
 
 
-@router.post("/transaction", tags=["transaction"], response_model=Transaction)
+@router.post("", response_model=Transaction)
 def create_transaction(
     transaction: TransactionCreate,
     session: sa.orm.Session = Depends(get_session),
@@ -83,11 +86,7 @@ def create_transaction(
     return transaction_db
 
 
-@router.get(
-    "/transaction",
-    tags=["transaction"],
-    response_model=list[Transaction],
-)
+@router.get("", response_model=list[Transaction])
 def get_transaction(session: sa.orm.Session = Depends(get_session)):
     query = session.query(db.models.Transaction)
     transactions = query.all()
