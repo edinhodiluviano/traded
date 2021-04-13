@@ -2,7 +2,7 @@ import datetime as dt
 
 import sqlalchemy as sa
 from pydantic import condecimal, validator
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from .dependencies import get_session
 from . import db
@@ -51,6 +51,7 @@ class Entry(EntryCreate):
     id: int
     datetime: dt.datetime
     transaction_id: int
+    cancel: bool
 
 
 class Transaction(TransactionCreate):
@@ -59,6 +60,7 @@ class Transaction(TransactionCreate):
     timestamp: dt.datetime
     datetime: dt.datetime
     value: condecimal(decimal_places=10)
+    cancel: bool
 
 
 @router.post("", response_model=Transaction)
@@ -91,3 +93,49 @@ def get_transaction(session: sa.orm.Session = Depends(get_session)):
     query = session.query(db.models.Transaction)
     transactions = query.all()
     return transactions
+
+
+@router.delete("/{transaction_id}", response_model=Transaction)
+def cancel_transaction(
+    transaction_id: int,
+    session: sa.orm.Session = Depends(get_session),
+):
+    # find the original transaction
+    transaction = session.query(db.models.Transaction).get(transaction_id)
+    if transaction is None:
+        msg = f"Transaction {transaction_id=} not found"
+        raise HTTPException(status_code=404, detail=msg)
+
+    # cancel it and create reverse entries
+    transaction.cancel = True
+    entries = []
+    for n in range(len(transaction.entries)):
+        original_entry = transaction.entries[n]
+        original_entry.cancel = True
+        new_entry = EntryCreate(
+            account_id=original_entry.account_id,
+            value=-original_entry.value,
+            asset_id=original_entry.asset_id,
+            quantity=-original_entry.quantity,
+        )
+        new_entry_db = db.models.Entry(
+            **new_entry.dict(),
+            datetime=transaction.datetime,
+            cancel=True,
+        )
+        entries.append(new_entry_db)
+
+    # create the reverse transaction
+    canceling = db.models.Transaction(
+        timestamp=dt.datetime.utcnow(),
+        datetime=transaction.datetime,
+        value=transaction.value,
+        description=f"Cancel: {transaction_id}",
+        entries=entries,
+        cancel=True,
+    )
+
+    # persist and return
+    session.add(canceling)
+    db.main.try_to_commit(session)
+    return canceling

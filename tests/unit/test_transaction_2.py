@@ -25,7 +25,6 @@ def test_insert_transaction(client):
         entries=[entry1, entry2],
     )
     resp = client.post("/transaction", json=transaction)
-    print(resp.json())
     assert resp.status_code == 200
     t = resp.json()
     check_is_a_valid_transaction(t)
@@ -38,7 +37,8 @@ def test_insert_transaction(client):
 
 
 def check_is_a_valid_transaction(transaction):
-    for field in ["id", "timestamp", "datetime", "entries", "value"]:
+    assert isinstance(transaction, dict)
+    for field in ["id", "timestamp", "datetime", "entries", "value", "cancel"]:
         assert field in transaction
     assert isinstance(transaction["id"], int)
     _ = dt.datetime.fromisoformat(transaction["datetime"])
@@ -62,4 +62,24 @@ def test_get_transactions(client):
 
 
 def test_revert_transaction(client):
-    pass
+    # create initial transactions
+    test_insert_transaction(client)
+    resp = client.get("/transaction")
+    transactions1 = resp.json()
+    # revert
+    resp2 = client.delete(f"/transaction/{transactions1[0]['id']}")
+    assert resp2.status_code == 200
+    transaction = resp2.json()
+    check_is_a_valid_transaction(transaction)
+    assert transaction["cancel"]
+    assert transaction["value"] == transactions1[0]["value"]
+    assert len(transaction["entries"]) == len(transactions1[0]["entries"])
+    for n in range(len(transaction["entries"])):
+        assert (
+            transaction["entries"][n]["value"]
+            == -transactions1[0]["entries"][n]["value"]
+        )
+    # check a new transaction was registered
+    resp3 = client.get("/transaction")
+    transactions2 = resp3.json()
+    assert len(transactions2) == len(transactions1) + 1

@@ -78,6 +78,7 @@ class Entry(Base):
         index=False,
         nullable=False,
     )
+    cancel = sa.Column(sa.Boolean, default=False, index=True, nullable=False)
 
 
 class Transaction(Base):
@@ -95,3 +96,4 @@ class Transaction(Base):
     )
     description = sa.Column(sa.String, index=False, nullable=False)
     entries = sa.orm.relationship("Entry", lazy="immediate")
+    cancel = sa.Column(sa.Boolean, default=False, index=True, nullable=False)
