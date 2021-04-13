@@ -1,4 +1,5 @@
 import sqlalchemy as sa
+import sqlalchemy.ext.declarative
 
 
 Base = sa.ext.declarative.declarative_base()
