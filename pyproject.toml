@@ -24,7 +24,7 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
-addopts = '-vvv --cov-report=term-missing --cov=traded'
+addopts = '-vvv --cov-report=term-missing --cov=traded -x --ff'
 testpaths = ["tests/unit"]
 
 [tool.black]
