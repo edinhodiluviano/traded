@@ -27,6 +27,12 @@ class EntryCreate(NoExtraModel):
             raise ValueError("Value should be not zero")
         return value
 
+    @validator("quantity")
+    def quantity_should_be_not_zero(cls, quantity):
+        if quantity == 0:
+            raise ValueError("Quantity should be not zero")
+        return quantity
+
 
 class TransactionCreate(NoExtraModel):
     datetime: dt.datetime
