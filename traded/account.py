@@ -15,7 +15,6 @@ router = APIRouter(
 class Account(NoExtraModel):
     id: int
     name: str
-    is_active: bool
 
 
 @router.get("/")
