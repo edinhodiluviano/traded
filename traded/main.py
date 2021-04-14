@@ -1,7 +1,7 @@
 import sqlalchemy as sa
 from fastapi import FastAPI
 
-from . import db, account, asset, transaction
+from . import db, account, asset, transaction, fund
 from .dependencies import sess
 
 
@@ -27,3 +27,4 @@ def db_setup(session: sa.orm.Session = sess):
 app.include_router(account.router)
 app.include_router(asset.router)
 app.include_router(transaction.router)
+app.include_router(fund.router)

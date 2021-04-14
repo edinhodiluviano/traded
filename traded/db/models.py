@@ -90,3 +90,11 @@ class Transaction(Base):
     description = sa.Column(sa.String, index=False, nullable=False)
     entries = sa.orm.relationship("Entry", lazy="immediate")
     cancel = sa.Column(sa.Boolean, default=False, index=True, nullable=False)
+
+
+class Fund(Base):
+    __tablename__ = "fund"
+
+    id = sa.Column(sa.Integer, primary_key=True, index=True)
+    name = sa.Column(sa.String, unique=True, index=True, nullable=False)
+    temporary = sa.Column(sa.Boolean, index=False, nullable=False)
