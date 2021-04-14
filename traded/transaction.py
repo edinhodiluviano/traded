@@ -2,9 +2,9 @@ import datetime as dt
 
 import sqlalchemy as sa
 from pydantic import condecimal, validator
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 
-from .dependencies import get_session
+from .dependencies import sess
 from . import db
 from ._classes import NoExtraModel
 
@@ -72,7 +72,7 @@ class Transaction(TransactionCreate):
 @router.post("", response_model=Transaction)
 def create_transaction(
     transaction: TransactionCreate,
-    session: sa.orm.Session = Depends(get_session),
+    session: sa.orm.Session = sess,
 ):
 
     entries = [
@@ -95,7 +95,7 @@ def create_transaction(
 
 
 @router.get("", response_model=list[Transaction])
-def get_transaction(session: sa.orm.Session = Depends(get_session)):
+def get_transaction(session: sa.orm.Session = sess):
     query = session.query(db.models.Transaction)
     transactions = query.all()
     return transactions
@@ -104,7 +104,7 @@ def get_transaction(session: sa.orm.Session = Depends(get_session)):
 @router.delete("/{transaction_id}", response_model=Transaction)
 def cancel_transaction(
     transaction_id: int,
-    session: sa.orm.Session = Depends(get_session),
+    session: sa.orm.Session = sess,
 ):
     # find the original transaction
     transaction = session.query(db.models.Transaction).get(transaction_id)

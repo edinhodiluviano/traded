@@ -1,7 +1,10 @@
+from fastapi import Depends
+
 from . import db
 
 
-def get_session():
+@Depends
+def sess():
     session = db.main.SessionLocal()
     try:
         yield session

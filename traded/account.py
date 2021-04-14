@@ -1,8 +1,8 @@
 import sqlalchemy as sa
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 
 from ._classes import NoExtraModel
-from .dependencies import get_session
+from .dependencies import sess
 from .db import models
 
 
@@ -20,7 +20,7 @@ class Account(NoExtraModel):
 
 
 @router.get("/")
-def get_by_name(name: str, session: sa.orm.Session = Depends(get_session)):
+def get_by_name(name: str, session: sa.orm.Session = sess):
     acc = (
         session.query(models.Account)
         .filter(models.Account.name == name)
