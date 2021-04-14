@@ -1,10 +1,7 @@
 import sqlalchemy as sa
 from fastapi import FastAPI, Depends
 
-from . import db
-from . import account_2 as account
-from . import asset_2 as asset
-from . import transaction_2 as transaction
+from . import db, account, asset, transaction
 from .dependencies import get_session
 
 

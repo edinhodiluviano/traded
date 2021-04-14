@@ -2,21 +2,16 @@ import datetime as dt
 
 
 def test_insert_transaction(client):
-    resp1 = client.get("/asset")
-    asset = resp1.json()[0]
-    account1 = client.get("/account", params=dict(name="Cash")).json()
-    account2 = client.get("/account", params=dict(name="Receivables")).json()
-
     entry1 = dict(
-        account_id=account1["id"],
+        account_id=1,
         value=10,
-        asset_id=asset["id"],
+        asset_id=2,
         quantity=10,
     )
     entry2 = dict(
-        account_id=account2["id"],
+        account_id=2,
         value=-10,
-        asset_id=asset["id"],
+        asset_id=2,
         quantity=-10,
     )
     transaction = dict(
@@ -83,3 +78,90 @@ def test_revert_transaction(client):
     resp3 = client.get("/transaction")
     transactions2 = resp3.json()
     assert len(transactions2) == len(transactions1) + 1
+
+
+def test_insert_transaction_with_0_entry_value(client):
+    entry1 = dict(
+        account_id=1,
+        value=0,
+        asset_id=2,
+        quantity=10,
+    )
+    entry2 = dict(
+        account_id=2,
+        value=-10,
+        asset_id=2,
+        quantity=-10,
+    )
+    entry3 = dict(
+        account_id=3,
+        value=10,
+        asset_id=2,
+        quantity=10,
+    )
+    transaction = dict(
+        datetime=dt.datetime(2021, 4, 12, 16).isoformat(timespec="seconds"),
+        description="testing transaction",
+        entries=[entry1, entry2, entry3],
+    )
+    resp = client.post("/transaction", json=transaction)
+    assert resp.status_code == 422
+
+
+def test_insert_transaction_with_0_entry_quantity(client):
+    entry1 = dict(
+        account_id=1,
+        value=10,
+        asset_id=2,
+        quantity=0,
+    )
+    entry2 = dict(
+        account_id=2,
+        value=-10,
+        asset_id=2,
+        quantity=-10,
+    )
+    transaction = dict(
+        datetime=dt.datetime(2021, 4, 12, 16).isoformat(timespec="seconds"),
+        description="testing transaction",
+        entries=[entry1, entry2],
+    )
+    resp = client.post("/transaction", json=transaction)
+    assert resp.status_code == 422
+
+
+def test_insert_transaction_with_imbalanced_entries(client):
+    entry1 = dict(
+        account_id=1,
+        value=11,
+        asset_id=2,
+        quantity=10,
+    )
+    entry2 = dict(
+        account_id=2,
+        value=-10,
+        asset_id=2,
+        quantity=-10,
+    )
+    transaction = dict(
+        datetime=dt.datetime(2021, 4, 12, 16).isoformat(timespec="seconds"),
+        description="testing transaction",
+        entries=[entry1, entry2],
+    )
+    resp = client.post("/transaction", json=transaction)
+    assert resp.status_code == 422
+
+
+def test_insert_transaction_with_no_entries(client):
+    transaction = dict(
+        datetime=dt.datetime(2021, 4, 12, 16).isoformat(timespec="seconds"),
+        description="testing transaction",
+        entries=[],
+    )
+    resp = client.post("/transaction", json=transaction)
+    assert resp.status_code == 422
+
+
+def test_cancel_non_existing_transaction(client):
+    resp = client.delete("/transaction/999999")
+    assert resp.status_code == 404
