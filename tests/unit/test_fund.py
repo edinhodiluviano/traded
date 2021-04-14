@@ -1,3 +1,5 @@
+import datetime as dt
+
 import pytest
 
 
@@ -19,7 +21,7 @@ def test_insert_fund(resp):
     fund = resp.json()
     check_valid_fund(fund)
     assert fund["name"] == "aaa"
-    assert fund["id"] == 1
+    assert fund["id"] >= 1
     assert not fund["temporary"]
 
 
@@ -56,3 +58,50 @@ def test_delete_fund(client):
     assert resp2.json() is None
     resp3 = client.get("/fund")
     assert len(resp3.json()) == 1
+
+
+def test_delete_fund_also_delete_its_transactions(client):
+    # insert fund
+    name = "bbb"
+    resp1 = client.post("/fund", json=dict(name=name, temporary=True))
+    fund_id = resp1.json()["id"]
+
+    # insert transaction
+    entry1 = dict(
+        account_id=1,
+        value=10,
+        asset_id=2,
+        quantity=10,
+    )
+    entry2 = dict(
+        account_id=2,
+        value=-10,
+        asset_id=2,
+        quantity=-10,
+    )
+    transaction = dict(
+        datetime=dt.datetime(2021, 4, 12, 16).isoformat(timespec="seconds"),
+        description="testing transaction",
+        entries=[entry1, entry2],
+        fund_id=fund_id,
+    )
+    resp = client.post("/transaction", json=transaction)
+    transaction = resp.json()
+
+    # delete fund
+    resp2 = client.delete(f"/fund/{fund_id}")
+    print(resp2.json())
+    assert resp2.status_code == 200
+
+    # check fund is gone
+    resp3 = client.get("f/fund/{fund_id}")
+    assert resp3.status_code == 404
+
+    # check transaction is gone
+    resp4 = client.get("/transaction")
+    for check_trans in resp4.json():
+        print("=" * 30)
+        print(f"{fund_id=}")
+        print(f"{check_trans=}")
+        assert check_trans["fund_id"] != fund_id
+        assert check_trans["id"] != transaction["id"]

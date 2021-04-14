@@ -55,9 +55,6 @@ class Entry(Base):
     account_id = sa.Column(
         sa.Integer, sa.ForeignKey("account.id"), nullable=False, index=True
     )
-    transaction_id = sa.Column(
-        sa.Integer, sa.ForeignKey("transaction.id"), nullable=False, index=True
-    )
     value = sa.Column(
         sa.Numeric(precision=20, scale=10, asdecimal=True),
         index=False,
@@ -72,6 +69,15 @@ class Entry(Base):
         nullable=False,
     )
     cancel = sa.Column(sa.Boolean, default=False, index=True, nullable=False)
+    fund_id = sa.Column(
+        sa.Integer,
+        sa.ForeignKey("fund.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    transaction_id = sa.Column(
+        sa.Integer, sa.ForeignKey("transaction.id"), nullable=False, index=True
+    )
 
 
 class Transaction(Base):
@@ -88,8 +94,15 @@ class Transaction(Base):
         nullable=False,
     )
     description = sa.Column(sa.String, index=False, nullable=False)
-    entries = sa.orm.relationship("Entry")
     cancel = sa.Column(sa.Boolean, default=False, index=True, nullable=False)
+    fund_id = sa.Column(
+        sa.Integer,
+        sa.ForeignKey("fund.id"),
+        nullable=False,
+        index=True,
+    )
+
+    entries = sa.orm.relationship("Entry", cascade="all, delete-orphan")
 
 
 class Fund(Base):
@@ -98,3 +111,8 @@ class Fund(Base):
     id = sa.Column(sa.Integer, primary_key=True, index=True)
     name = sa.Column(sa.String, unique=True, index=True, nullable=False)
     temporary = sa.Column(sa.Boolean, index=False, nullable=False)
+
+    transactions = sa.orm.relationship(
+        "Transaction",
+        cascade="all, delete-orphan",
+    )

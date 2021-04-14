@@ -38,6 +38,7 @@ class TransactionCreate(NoExtraModel):
     datetime: dt.datetime
     description: str
     entries: list[EntryCreate]
+    fund_id: int
 
     @validator("entries")
     def entries_should_be_balanced(cls, entries):
@@ -58,6 +59,7 @@ class Entry(EntryCreate):
     datetime: dt.datetime
     transaction_id: int
     cancel: bool
+    fund_id: int
 
 
 class Transaction(TransactionCreate):
@@ -67,6 +69,7 @@ class Transaction(TransactionCreate):
     datetime: dt.datetime
     value: condecimal(decimal_places=10)
     cancel: bool
+    fund_id: int
 
 
 @router.post("", response_model=Transaction)
@@ -76,7 +79,11 @@ def create_transaction(
 ):
 
     entries = [
-        db.models.Entry(**entry.dict(), datetime=transaction.datetime)
+        db.models.Entry(
+            **entry.dict(),
+            datetime=transaction.datetime,
+            fund_id=transaction.fund_id,
+        )
         for entry in transaction.entries
     ]
     entries_value = sum([entry.value for entry in entries if entry.value > 0])
@@ -87,6 +94,7 @@ def create_transaction(
         value=entries_value,
         description=transaction.description,
         entries=entries,
+        fund_id=transaction.fund_id,
     )
     session.add(transaction_db)
     db.main.try_to_commit(session)
@@ -128,6 +136,7 @@ def cancel_transaction(
             **new_entry.dict(),
             datetime=transaction.datetime,
             cancel=True,
+            fund_id=transaction.fund_id,
         )
         entries.append(new_entry_db)
 
@@ -139,6 +148,7 @@ def cancel_transaction(
         description=f"Cancel: {transaction_id}",
         entries=entries,
         cancel=True,
+        fund_id=transaction.fund_id,
     )
 
     # persist and return
