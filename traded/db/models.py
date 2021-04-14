@@ -88,7 +88,7 @@ class Transaction(Base):
         nullable=False,
     )
     description = sa.Column(sa.String, index=False, nullable=False)
-    entries = sa.orm.relationship("Entry", lazy="immediate")
+    entries = sa.orm.relationship("Entry")
     cancel = sa.Column(sa.Boolean, default=False, index=True, nullable=False)
 
 
