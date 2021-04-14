@@ -15,7 +15,6 @@ router = APIRouter(
 class Account(NoExtraModel):
     id: int
     name: str
-    postable: bool
     is_active: bool
 
 
