@@ -111,6 +111,13 @@ class Fund(Base):
     id = sa.Column(sa.Integer, primary_key=True, index=True)
     name = sa.Column(sa.String, unique=True, index=True, nullable=False)
     temporary = sa.Column(sa.Boolean, index=False, nullable=False)
+    asset_id = sa.Column(
+        sa.Integer,
+        sa.ForeignKey("asset.id"),
+        nullable=False,
+        index=False,
+    )
+    asset = sa.orm.relationship("Asset")
 
     transactions = sa.orm.relationship(
         "Transaction",

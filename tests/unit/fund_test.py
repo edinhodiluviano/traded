@@ -6,13 +6,18 @@ import pytest
 @pytest.fixture(scope="module")
 def resp(client):
     name = "aaa"
-    resp = client.post("/fund", json=dict(name=name, temporary=False))
+    fund = dict(name=name, temporary=False, asset_id=1)
+    resp = client.post("/fund", json=fund)
+    print(resp.json())
     yield resp
 
 
 def check_valid_fund(fund):
+    for field in ["name", "id", "asset", "temporary"]:
+        assert field in fund
     assert isinstance(fund["name"], str)
     assert isinstance(fund["id"], int)
+    assert isinstance(fund["asset"], dict)
     assert fund["temporary"] in {True, False}
 
 
@@ -51,7 +56,8 @@ def test_delete_fund_not_temporary(resp, client):
 
 def test_delete_fund(client):
     name = "bbb"
-    resp1 = client.post("/fund", json=dict(name=name, temporary=True))
+    fund_dict = dict(name=name, temporary=True, asset_id=1)
+    resp1 = client.post("/fund", json=fund_dict)
     fund = resp1.json()
     resp2 = client.delete(f"/fund/{fund['id']}")
     assert resp2.status_code == 200
@@ -63,7 +69,8 @@ def test_delete_fund(client):
 def test_delete_fund_also_delete_its_transactions(client):
     # insert fund
     name = "bbb"
-    resp1 = client.post("/fund", json=dict(name=name, temporary=True))
+    fund_dict = dict(name=name, temporary=True, asset_id=1)
+    resp1 = client.post("/fund", json=fund_dict)
     fund_id = resp1.json()["id"]
 
     # insert transaction
@@ -105,3 +112,10 @@ def test_delete_fund_also_delete_its_transactions(client):
         print(f"{check_trans=}")
         assert check_trans["fund_id"] != fund_id
         assert check_trans["id"] != transaction["id"]
+
+
+def test_create_fund_with_non_existent_asset(client):
+    name = "ccc"
+    fund_dict = dict(name=name, temporary=True, asset_id=9999999)
+    resp = client.post("/fund", json=fund_dict)
+    assert resp.status_code == 422

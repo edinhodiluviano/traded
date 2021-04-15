@@ -6,7 +6,8 @@ import pytest
 @pytest.fixture(scope="module")
 def fund_id(client):
     name = "aaa"
-    resp = client.post("/fund", json=dict(name=name, temporary=True))
+    fund = dict(name=name, temporary=True, asset_id=1)
+    resp = client.post("/fund", json=fund)
     yield resp.json()["id"]
 
 
