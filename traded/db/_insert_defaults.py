@@ -11,26 +11,27 @@ def all(session: sa.orm.Session):
 def _insert_default_coa(session: sa.orm.Session):  # noqa: C901
     # the testing chart of accounts
     coa = """
-    root
-        Assets
-            Cash
-            Receivables
-            Inventory
-        Liabilities
-            Payables
-            Shares Issued
-            Retained Earnings
-        Income
-            Trade
-            Interest
-        Expenses
-            Fees
-                Broker
-                Administration
-            Tax
-            Other
+    root                        #  1
+        Assets                  #  2
+            Cash                #  3
+            Receivables         #  4
+            Inventory           #  5
+        Liabilities             #  6
+            Payables            #  7
+            Shares Issued       #  8
+            Retained Earnings   #  9
+        Income                  # 10
+            Trade               # 11
+            Interest            # 12
+        Expenses                # 13
+            Fees                # 14
+                Broker          # 15
+                Administration  # 16
+            Tax                 # 17
+            Other               # 18
     """
     coa = [line for line in coa.splitlines() if line.strip() != ""]
+    coa = [line.split("#")[0].rstrip() for line in coa]
 
     def _get_level(coa, line):
         line_str = coa[line]
