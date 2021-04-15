@@ -15,3 +15,9 @@ def test_get_with_invalid_account(client):
 def test_get_without_name(client):
     resp = client.get("/account")
     assert resp.status_code == 422
+
+
+def test_root_id_is_1(client):
+    resp = client.get("/account/?name=root")
+    assert resp.status_code == 200
+    assert resp.json()["id"] == 1

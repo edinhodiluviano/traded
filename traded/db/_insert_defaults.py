@@ -8,61 +8,64 @@ def all(session: sa.orm.Session):
     _insert_default_assets(session)
 
 
-def _insert_default_coa(session: sa.orm.Session):  # noqa: C901 - too complex
-    coa = {
-        "root": [
-            {
-                "Assets": [
-                    "Cash",
-                    "Receivables",
-                    "Inventory",
-                ],
-            },
-            {
-                "Liabilities": [
-                    "Payables",
-                    "Shares Issued",
-                    "Retained Earnings",
-                ],
-            },
-            {
-                "Income": [
-                    "Trade",
-                    "Carry",
-                ],
-            },
-            {
-                "Expenses": [
-                    {
-                        "Fees": [
-                            "Broker",
-                            "Administration",
-                        ],
-                    },
-                    "Tax",
-                    "Other",
-                ],
-            },
-        ],
-    }
+def _insert_default_coa(session: sa.orm.Session):  # noqa: C901
+    coa = """
+    root
+        Assets
+            Cash
+            Receivables
+            Inventory
+        Liabilities
+            Payables
+            Shares Issued
+            Retained Earnings
+        Income
+            Trade
+            Carry
+        Expenses
+            Fees
+                Broker
+                Administration
+            Tax
+            Other
+    """
+    coa = [line for line in coa.splitlines() if line.strip() != ""]
 
-    def _traverse_and_insert_coa(obj, parent_obj, session):
-        if isinstance(obj, str):
-            acc = models.Account(name=obj, parent=[parent_obj])
-            session.add(acc)
-            return acc
-        elif isinstance(obj, dict):
-            for k, v in obj.items():
-                assert isinstance(v, list)
-                if parent_obj is None:
-                    acc = models.Account(name=k)
-                else:
-                    acc = models.Account(name=k, parent=[parent_obj])
+    def _get_level(coa, line):
+        line_str = coa[line]
+        level = len(line_str) - len(line_str.lstrip()) - 4
+        level = level // 4
+        return level
+
+    def _insert_next(coa, line, parent_id, curr_level, last_id):
+        while line < len(coa) - 1:
+            line += 1
+            now_level = _get_level(coa, line)
+            name = coa[line].strip()
+            print(f"{name=}")
+            if now_level == curr_level:
+                last_id += 1
+                acc = models.Account(
+                    id=last_id, name=name, parent_id=parent_id
+                )
                 session.add(acc)
-                for item in v:
-                    _traverse_and_insert_coa(item, acc, session)
+            elif now_level == curr_level + 1:
+                line -= 1
+                line, last_id = _insert_next(
+                    coa=coa,
+                    line=line,
+                    parent_id=last_id,
+                    curr_level=now_level,
+                    last_id=last_id,
+                )
+            elif now_level < curr_level:
+                return line - 1, last_id
+        return line, last_id
 
-    _traverse_and_insert_coa(coa, None, session)
+    root = models.Account(id=1, name=coa[0].strip(), parent_id=None)
+    session.add(root)
+    _insert_next(coa=coa, line=0, parent_id=1, curr_level=1, last_id=1)
+
     session.commit()
 
 
