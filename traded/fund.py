@@ -55,6 +55,12 @@ def delete_fund(
     fund_id: int = Path(..., ge=1),
     session: sa.orm.Session = sess,
 ):
+    """
+    Deletes a temporary fund
+    Only temporary funds can be deleted, otherwise you will get an 403 error
+    When a fund is deleted, all of its transactions and entries are deleted too
+    """
+
     fund = session.query(db.models.Fund).get(fund_id)
     if fund is None:
         msg = f"Fund {fund_id=} not found"

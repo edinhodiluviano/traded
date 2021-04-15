@@ -77,7 +77,6 @@ def create_transaction(
     transaction: TransactionCreate,
     session: sa.orm.Session = sess,
 ):
-
     entries = [
         db.models.Entry(
             **entry.dict(),
@@ -114,6 +113,8 @@ def cancel_transaction(
     transaction_id: int,
     session: sa.orm.Session = sess,
 ):
+    "Creates a transaction that reverse the original"
+
     # find the original transaction
     transaction = session.query(db.models.Transaction).get(transaction_id)
     if transaction is None:
