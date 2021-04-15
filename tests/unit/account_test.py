@@ -9,8 +9,7 @@ def test_get(client):
 
 def test_get_with_invalid_account(client):
     resp = client.get("/account/?name=xxxxx")
-    assert resp.status_code == 200
-    assert resp.json() is None
+    assert resp.status_code == 404
 
 
 def test_get_without_name(client):
