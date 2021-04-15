@@ -9,6 +9,7 @@ def all(session: sa.orm.Session):
 
 
 def _insert_default_coa(session: sa.orm.Session):  # noqa: C901
+    # the testing chart of accounts
     coa = """
     root
         Assets
@@ -21,7 +22,7 @@ def _insert_default_coa(session: sa.orm.Session):  # noqa: C901
             Retained Earnings
         Income
             Trade
-            Carry
+            Interest
         Expenses
             Fees
                 Broker
@@ -43,13 +44,13 @@ def _insert_default_coa(session: sa.orm.Session):  # noqa: C901
             now_level = _get_level(coa, line)
             name = coa[line].strip()
             print(f"{name=}")
-            if now_level == curr_level:
+            if now_level == curr_level:  # sibling account
                 last_id += 1
                 acc = models.Account(
                     id=last_id, name=name, parent_id=parent_id
                 )
                 session.add(acc)
-            elif now_level == curr_level + 1:
+            elif now_level == curr_level + 1:  # child
                 line -= 1
                 line, last_id = _insert_next(
                     coa=coa,
@@ -58,7 +59,7 @@ def _insert_default_coa(session: sa.orm.Session):  # noqa: C901
                     curr_level=now_level,
                     last_id=last_id,
                 )
-            elif now_level < curr_level:
+            elif now_level < curr_level:  # go back one level
                 return line - 1, last_id
         return line, last_id
 
