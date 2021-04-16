@@ -44,7 +44,6 @@ def _insert_default_coa(session: sa.orm.Session):  # noqa: C901
             line += 1
             now_level = _get_level(coa, line)
             name = coa[line].strip()
-            print(f"{name=}")
             if now_level == curr_level:  # sibling account
                 last_id += 1
                 acc = models.Account(
