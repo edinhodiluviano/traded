@@ -4,9 +4,9 @@ from typing import Optional
 
 import sqlalchemy as sa
 from pydantic import BaseModel, condecimal
-from fastapi import APIRouter, Depends, Path
+from fastapi import APIRouter, Path
 
-from .dependencies import get_session
+from .dependencies import sess
 from . import db
 
 
@@ -75,7 +75,7 @@ class Bond(BondCreate):
 
 
 @router.get("/", response_model=list[Asset])
-def get_all_assets(session: sa.orm.Session = Depends(get_session)):
+def get_all_assets(session: sa.orm.Session = sess):
     query = session.query(db.models.Asset)
     assets = query.all()
     return assets
@@ -84,7 +84,7 @@ def get_all_assets(session: sa.orm.Session = Depends(get_session)):
 @router.get("/{asset_id}", response_model=Asset)
 def get_by_id(
     asset_id: int = Path(..., ge=1),
-    session: sa.orm.Session = Depends(get_session),
+    session: sa.orm.Session = sess,
 ):
     query = session.query(db.models.Asset)
     asset = query.filter(db.models.Asset.id == asset_id).first()
@@ -97,7 +97,7 @@ def create_asset_factory(
 ):
     def create_asset(
         asset_create: asset_create_class,
-        session: sa.orm.Session = Depends(get_session),
+        session: sa.orm.Session = sess,
     ):
         asset_dict = asset_create.dict()
         asset_dict["type"] = asset_type.value
@@ -121,7 +121,7 @@ def update_asset_factory(
     def update_asset(
         asset_id: int,
         asset_update: asset_create_class,
-        session: sa.orm.Session = Depends(get_session),
+        session: sa.orm.Session = sess,
     ):
         asset_db = session.query(db.models.Asset).get(asset_id)
         for field, value in asset_update.dict().items():

@@ -1,7 +1,17 @@
 import datetime as dt
 
+import pytest
 
-def test_insert_transaction(client):
+
+@pytest.fixture(scope="module")
+def fund_id(client):
+    name = "aaa"
+    fund = dict(name=name, temporary=True, asset_id=1)
+    resp = client.post("/fund", json=fund)
+    yield resp.json()["id"]
+
+
+def test_insert_transaction(client, fund_id):
     entry1 = dict(
         account_id=1,
         value=10,
@@ -18,6 +28,7 @@ def test_insert_transaction(client):
         datetime=dt.datetime(2021, 4, 12, 16).isoformat(timespec="seconds"),
         description="testing transaction",
         entries=[entry1, entry2],
+        fund_id=fund_id,
     )
     resp = client.post("/transaction", json=transaction)
     assert resp.status_code == 200
@@ -47,8 +58,8 @@ def check_is_a_valid_transaction(transaction):
         assert entry["value"] != 0
 
 
-def test_get_transactions(client):
-    test_insert_transaction(client)
+def test_get_transactions(client, fund_id):
+    test_insert_transaction(client, fund_id)
     resp = client.get("/transaction")
     assert resp.status_code == 200
     transactions = resp.json()
@@ -56,9 +67,9 @@ def test_get_transactions(client):
         check_is_a_valid_transaction(transaction)
 
 
-def test_revert_transaction(client):
+def test_revert_transaction(client, fund_id):
     # create initial transactions
-    test_insert_transaction(client)
+    test_insert_transaction(client, fund_id)
     resp = client.get("/transaction")
     transactions1 = resp.json()
     # revert
@@ -80,7 +91,7 @@ def test_revert_transaction(client):
     assert len(transactions2) == len(transactions1) + 1
 
 
-def test_insert_transaction_with_0_entry_value(client):
+def test_insert_transaction_with_0_entry_value(client, fund_id):
     entry1 = dict(
         account_id=1,
         value=0,
@@ -103,12 +114,13 @@ def test_insert_transaction_with_0_entry_value(client):
         datetime=dt.datetime(2021, 4, 12, 16).isoformat(timespec="seconds"),
         description="testing transaction",
         entries=[entry1, entry2, entry3],
+        fund_id=fund_id,
     )
     resp = client.post("/transaction", json=transaction)
     assert resp.status_code == 422
 
 
-def test_insert_transaction_with_0_entry_quantity(client):
+def test_insert_transaction_with_0_entry_quantity(client, fund_id):
     entry1 = dict(
         account_id=1,
         value=10,
@@ -125,12 +137,13 @@ def test_insert_transaction_with_0_entry_quantity(client):
         datetime=dt.datetime(2021, 4, 12, 16).isoformat(timespec="seconds"),
         description="testing transaction",
         entries=[entry1, entry2],
+        fund_id=fund_id,
     )
     resp = client.post("/transaction", json=transaction)
     assert resp.status_code == 422
 
 
-def test_insert_transaction_with_imbalanced_entries(client):
+def test_insert_transaction_with_imbalanced_entries(client, fund_id):
     entry1 = dict(
         account_id=1,
         value=11,
@@ -147,16 +160,18 @@ def test_insert_transaction_with_imbalanced_entries(client):
         datetime=dt.datetime(2021, 4, 12, 16).isoformat(timespec="seconds"),
         description="testing transaction",
         entries=[entry1, entry2],
+        fund_id=fund_id,
     )
     resp = client.post("/transaction", json=transaction)
     assert resp.status_code == 422
 
 
-def test_insert_transaction_with_no_entries(client):
+def test_insert_transaction_with_no_entries(client, fund_id):
     transaction = dict(
         datetime=dt.datetime(2021, 4, 12, 16).isoformat(timespec="seconds"),
         description="testing transaction",
         entries=[],
+        fund_id=fund_id,
     )
     resp = client.post("/transaction", json=transaction)
     assert resp.status_code == 422

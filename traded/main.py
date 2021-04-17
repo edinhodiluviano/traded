@@ -1,8 +1,8 @@
 import sqlalchemy as sa
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 
-from . import db, account, asset, transaction
-from .dependencies import get_session
+from . import db, account, asset, transaction, fund, finance
+from .dependencies import sess
 
 
 app = FastAPI()
@@ -15,7 +15,7 @@ async def root():
 
 
 @app.get("/db_setup")
-def db_setup(session: sa.orm.Session = Depends(get_session)):
+def db_setup(session: sa.orm.Session = sess):
     """
     ### test only
     Setups the database tables and some values for testing purpuses.<br>
@@ -27,3 +27,5 @@ def db_setup(session: sa.orm.Session = Depends(get_session)):
 app.include_router(account.router)
 app.include_router(asset.router)
 app.include_router(transaction.router)
+app.include_router(fund.router)
+app.include_router(finance.router)
