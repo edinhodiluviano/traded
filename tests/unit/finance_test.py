@@ -80,3 +80,13 @@ def _get_account_from_tree(tree: dict, account_id: int) -> dict:
         acc = _get_account_from_tree(child, account_id)
         if acc.id == account_id:
             return acc
+
+
+def test_get_balance_sheet_without_date(client):
+    resp = client.get("/finance/balancesheet/1")
+    assert resp.status_code == 200
+    bs = resp.json()
+    assert isinstance(bs, dict)
+    assert bs["name"] == "root"
+    assert bs["balance"] == 0
+    assert bs["childs"][0]["childs"][0]["balance"] == 500

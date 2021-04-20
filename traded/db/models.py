@@ -16,6 +16,12 @@ class Account(Base):
 
     parent = sa.orm.relationship("Account")
 
+    def __repr__(self):
+        d = self.__dict__
+        if "_sa_instance_state" in d:
+            del d["_sa_instance_state"]
+        return str(d)
+
 
 class Asset(Base):
     """
@@ -78,6 +84,12 @@ class Entry(Base):
     transaction_id = sa.Column(
         sa.Integer, sa.ForeignKey("transaction.id"), nullable=False, index=True
     )
+
+    def __repr__(self):
+        d = self.__dict__
+        if "_sa_instance_state" in d:
+            del d["_sa_instance_state"]
+        return str(d)
 
 
 class Transaction(Base):
