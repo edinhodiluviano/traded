@@ -51,6 +51,13 @@ class Asset(Base):
     )
 
 
+class Broker(Base):
+    __tablename__ = "broker"
+
+    id = sa.Column(sa.Integer, primary_key=True, index=True)
+    name = sa.Column(sa.String, unique=True, index=True, nullable=False)
+
+
 class Entry(Base):
     "A simple journal entry"
 
