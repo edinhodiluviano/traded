@@ -1,5 +1,14 @@
 name: Main Workflow
+
 on: ['push', 'pull_request', 'workflow_dispatch']
+
+env:
+  POSTGRES_USER: dbuser
+  POSTGRES_PASSWORD: 123qwe
+  POSTGRES_HOST: database
+  POSTGRES_DB: dbname
+  POSTGRES_POOL_SIZE: 10
+
 jobs:
   automated-tests:
     strategy:
