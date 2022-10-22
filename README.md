@@ -1,4 +1,4 @@
-![unit tests](https://github.com/edinhodiluviano/traded/actions/workflows/actions.yml/badge.svg)
+![Tests](https://github.com/edinhodiluviano/traded/actions/workflows/main.yml/badge.svg)
 
 
 # traded
