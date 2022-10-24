@@ -17,6 +17,11 @@ class Account(Base):
     entry = sa.Column(sa.Boolean, index=False, nullable=False)
     active = sa.Column(sa.Boolean, index=True, nullable=False)
 
+    parent = sa.orm.relationship("Account", remote_side=[id])
+    children = sa.orm.relationship(
+        "Account", lazy="joined", join_depth=2, viewonly=True
+    )
+
     @classmethod
     def new(
         cls,
@@ -26,12 +31,10 @@ class Account(Base):
         entry: bool = True,
         active: bool = True,
     ) -> "Account":
-        parent_id = None
-        if parent:
-            parent_id = parent.id
+
         a = cls(
             name=name,
-            parent_id=parent_id,
+            parent=parent,
             entry=entry,
             active=active,
         )
