@@ -44,6 +44,7 @@ class Account(Base):
         return a
 
     def change_balance(self, /, diff_value: Decimal):
+        """Change balance of account and parents by the diff_value."""
         self.balance += diff_value
         if self.parent is not None:
             self.parent.change_balance(diff_value)
