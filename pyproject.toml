@@ -32,6 +32,9 @@ build-backend = "poetry.core.masonry.api"
 [tool.pytest.ini_options]
 addopts = '-vvv --cov-report=term-missing --cov=traded'
 testpaths = ["tests/unit"]
+filterwarnings = [
+    'ignore:Dialect sqlite\+pysqlite does \*not\* support Decimal:sqlalchemy.exc.SAWarning',
+]
 
 [tool.black]
 line-length = 79

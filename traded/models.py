@@ -16,6 +16,7 @@ class Account(Base):
     name = sa.Column(sa.String, unique=False, index=True, nullable=False)
     entry = sa.Column(sa.Boolean, index=False, nullable=False)
     active = sa.Column(sa.Boolean, index=True, nullable=False)
+    balance = sa.Column(sa.Numeric(12, 6), nullable=False)
 
     parent = sa.orm.relationship("Account", remote_side=[id])
     children = sa.orm.relationship(
@@ -30,6 +31,7 @@ class Account(Base):
         parent: "Account" = None,
         entry: bool = True,
         active: bool = True,
+        balance: Decimal = 0,
     ) -> "Account":
 
         a = cls(
@@ -37,8 +39,14 @@ class Account(Base):
             parent=parent,
             entry=entry,
             active=active,
+            balance=balance,
         )
         return a
+
+    def update_balance(self, /, diff_value: Decimal):
+        self.balance += diff_value
+        if self.parent is not None:
+            self.parent.update_balance(diff_value)
 
 
 class EntryLine(Base):
@@ -56,6 +64,7 @@ class EntryLine(Base):
         account: Account,
         value: Decimal,
     ) -> "EntryLine":
+        account.update_balance(value)
         o = cls(account_id=account.id, value=value)
         return o
 
