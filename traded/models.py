@@ -84,9 +84,9 @@ class Entry(Base):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.check_balance()
+        self._check_balance()
 
-    def check_balance(self):
+    def _check_balance(self):
         balance = sum([e.value for e in self.entries])
         if balance != 0:
             msg = f"Entries should be balanced but {balance=}"
