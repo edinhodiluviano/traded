@@ -43,10 +43,10 @@ class Account(Base):
         )
         return a
 
-    def update_balance(self, /, diff_value: Decimal):
+    def change_balance(self, /, diff_value: Decimal):
         self.balance += diff_value
         if self.parent is not None:
-            self.parent.update_balance(diff_value)
+            self.parent.change_balance(diff_value)
 
 
 class EntryLine(Base):
@@ -64,7 +64,7 @@ class EntryLine(Base):
         account: Account,
         value: Decimal,
     ) -> "EntryLine":
-        account.update_balance(value)
+        account.change_balance(value)
         o = cls(account_id=account.id, value=value)
         return o
 
