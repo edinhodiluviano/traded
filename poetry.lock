@@ -458,7 +458,7 @@ cli = ["click (>=5.0)"]
 name = "pyyaml"
 version = "6.0"
 description = "YAML parser and emitter for Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -627,7 +627,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "76d3b13246b86f606ce480a601ef83a573fe8e44e0376c3064df97db644c411a"
+content-hash = "e70f35e58650ca606f6feaf7c94741e94cc121e5be6ed386858a77faa0993873"
 
 [metadata.files]
 alembic = [

@@ -1,0 +1,15 @@
+Asset:
+    - Cash
+    - Accounts Receivable
+    - Stocks
+Liability:
+    - Accounts Payable
+Equity:
+    - Shareholders
+    - Retained Earnings
+Revenue:
+    - Dividends
+    - Mark to Market
+Expense:
+    - Fees
+    - Taxes
