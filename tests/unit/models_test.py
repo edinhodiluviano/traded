@@ -61,3 +61,41 @@ def test_given_balanced_entries_and_dict_when_new_entry_return_entry_object():
     ]
     o = traded.models.Entry.new(entries=entries)
     assert isinstance(o, traded.models.Entry)
+
+
+def test_given_new_entry_when_save_then_entry_count_increase_by_one(session):
+    stmt = sa.select(sa.func.count(traded.models.Entry.id))
+    count_before = session.scalar(stmt)
+
+    acc = traded.models.Account.new(name="aaa")
+    entries = [
+        traded.models.EntryLine.new(account=acc, value=10),
+        traded.models.EntryLine.new(account=acc, value=-3),
+        traded.models.EntryLine.new(account=acc, value=-7),
+    ]
+    o = traded.models.Entry.new(entries=entries)
+    session.add(o)
+    session.commit()
+
+    count_after = session.scalar(stmt)
+    assert count_after == count_before + 1
+
+
+def test_given_entry_with_3_lines_when_save_then_entry_lines_increase_by_3(
+    session,
+):
+    stmt = sa.select(sa.func.count(traded.models.EntryLine.id))
+    count_before = session.scalar(stmt)
+
+    acc = traded.models.Account.new(name="aaa")
+    entries = [
+        traded.models.EntryLine.new(account=acc, value=10),
+        traded.models.EntryLine.new(account=acc, value=-3),
+        traded.models.EntryLine.new(account=acc, value=-7),
+    ]
+    o = traded.models.Entry.new(entries=entries)
+    session.add(o)
+    session.commit()
+
+    count_after = session.scalar(stmt)
+    assert count_after == count_before + 3
