@@ -77,10 +77,9 @@ class EntryLine(Base):
 
 class Entry(Base):
     __tablename__ = "entry"
-
     id = sa.Column(sa.Integer, primary_key=True, index=True)
-
     entries = sa.orm.relationship("EntryLine")
+    note = sa.Column(sa.String, unique=False, index=False, nullable=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -93,8 +92,8 @@ class Entry(Base):
             raise ValueError(msg)
 
     @classmethod
-    def new(cls, *, entries: list) -> "Entry":
-        new_entry = cls(entries=[])
+    def new(cls, *, entries: list, note: str) -> "Entry":
+        new_entry = cls(entries=[], note=note)
         for entry_line in entries:
             if isinstance(entry_line, dict):
                 entry_line = EntryLine.from_dict(entry_line)

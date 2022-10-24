@@ -97,7 +97,7 @@ def test_when_add_entry_then_cash_balance_reflects_new_entries(session, coa):
         traded.models.EntryLine.new(account=cash_acc, value=10),
         traded.models.EntryLine.new(account=share_acc, value=-10),
     ]
-    traded.models.Entry.new(entries=entries)
+    traded.models.Entry.new(entries=entries, note="unit tests")
     session.commit()
 
     assert cash_acc.balance == 10
@@ -119,7 +119,7 @@ def test_when_add_entry_then_asset_balance_reflects_new_entries(session, coa):
         traded.models.EntryLine.new(account=cash_acc, value=10),
         traded.models.EntryLine.new(account=share_acc, value=-10),
     ]
-    traded.models.Entry.new(entries=entries)
+    traded.models.Entry.new(entries=entries, note="unit tests")
     session.commit()
 
     assert asset_acc.balance == 10
@@ -144,7 +144,7 @@ def test_when_add_entry_then_root_balance_remains_zero(session, coa):
         traded.models.EntryLine.new(account=share_acc, value=-7),
         traded.models.EntryLine.new(account=payable_acc, value=-3),
     ]
-    traded.models.Entry.new(entries=entries)
+    traded.models.Entry.new(entries=entries, note="unit tests")
     session.commit()
 
     assert root_acc.balance == 0

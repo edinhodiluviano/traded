@@ -48,7 +48,7 @@ def test_given_balanced_entries_when_new_entry_return_entry_object():
         traded.models.EntryLine.new(account=acc, value=-3),
         traded.models.EntryLine.new(account=acc, value=-7),
     ]
-    o = traded.models.Entry.new(entries=entries)
+    o = traded.models.Entry.new(entries=entries, note="unit tests")
     assert isinstance(o, traded.models.Entry)
 
 
@@ -59,7 +59,7 @@ def test_given_balanced_entries_and_dict_when_new_entry_return_entry_object():
         traded.models.EntryLine.new(account=acc, value=-7),
         {"account": acc, "value": -3},
     ]
-    o = traded.models.Entry.new(entries=entries)
+    o = traded.models.Entry.new(entries=entries, note="unit tests")
     assert isinstance(o, traded.models.Entry)
 
 
@@ -73,7 +73,7 @@ def test_given_new_entry_when_save_then_entry_count_increase_by_one(session):
         traded.models.EntryLine.new(account=acc, value=-3),
         traded.models.EntryLine.new(account=acc, value=-7),
     ]
-    o = traded.models.Entry.new(entries=entries)
+    o = traded.models.Entry.new(entries=entries, note="unit tests")
     session.add(o)
     session.commit()
 
@@ -93,7 +93,7 @@ def test_given_entry_with_3_lines_when_save_then_entry_lines_increase_by_3(
         traded.models.EntryLine.new(account=acc, value=-3),
         traded.models.EntryLine.new(account=acc, value=-7),
     ]
-    o = traded.models.Entry.new(entries=entries)
+    o = traded.models.Entry.new(entries=entries, note="unit tests")
     session.add(o)
     session.commit()
 
