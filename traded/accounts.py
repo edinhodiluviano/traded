@@ -35,7 +35,7 @@ def load_chart_of_accounts(filename: Path, session: sa.orm.session):
     return root_acc
 
 
-def _traverse_accounts(account, parent):
+def _traverse_accounts(account, parent):  # NOQA: C901
     if isinstance(account, str):
         yield models.Account.new(name=account, parent=parent)
     elif isinstance(account, list):
