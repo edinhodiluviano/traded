@@ -35,14 +35,15 @@ def load_chart_of_accounts(filename: Path, session: sa.orm.session):
     return root_acc
 
 
-def _traverse_accounts(account, parent):  # NOQA: C901
-    if isinstance(account, str):
-        yield models.Account.new(name=account, parent=parent)
-    elif isinstance(account, list):
-        for item in account:
-            yield from _traverse_accounts(item, parent)
-    elif isinstance(account, dict):
-        for key, value in account.items():
-            acc = models.Account.new(name=key, parent=parent, entry=False)
-            yield acc
-            yield from _traverse_accounts(value, acc)
+def _traverse_accounts(account, parent):
+    match account:
+        case str():
+            yield models.Account.new(name=account, parent=parent)
+        case list():
+            for item in account:
+                yield from _traverse_accounts(item, parent)
+        case dict():
+            for key, value in account.items():
+                acc = models.Account.new(name=key, parent=parent, entry=False)
+                yield acc
+                yield from _traverse_accounts(value, acc)
