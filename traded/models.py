@@ -93,12 +93,7 @@ class EntryLine(Base):
 
     @classmethod
     def from_dict(cls, /, d: dict):
-        o = cls.new(
-            account=d["account"],
-            value=d["value"],
-            asset=d["asset"],
-            quantity=d["quantity"],
-        )
+        o = cls.new(**d)
         return o
 
 
