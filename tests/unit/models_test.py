@@ -121,3 +121,20 @@ def test_given_entry_with_3_lines_when_save_then_entry_lines_increase_by_3(
 def test_account_object_has_no_balance_attribute():
     acc = traded.models.Account.new(name="aaa")
     assert not hasattr(acc, "balance")
+
+
+def test_when_asset_get_from_name_with_non_existing_asset_then_return_none(
+    session,
+):
+    resp = traded.models.Asset.get_from_name(name="aaa", session=session)
+    assert resp is None
+
+
+def test_when_asset_get_from_name_with_existing_asset_then_return_asset(
+    session,
+):
+    asset1 = traded.models.Asset(name="BRL", type="currency", price_asset=None)
+    session.add(asset1)
+    session.commit()
+    asset2 = traded.models.Asset.get_from_name(name="BRL", session=session)
+    assert asset1 == asset2
