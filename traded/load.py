@@ -6,7 +6,7 @@ import yaml
 from . import models
 
 
-def load_chart_of_accounts(filename: Path, session: sa.orm.session):
+def chart_of_accounts(filename: Path, session: sa.orm.session):
     """
     Load a Chart of Account defined in a yaml file.
 

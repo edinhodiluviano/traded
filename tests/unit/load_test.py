@@ -15,9 +15,7 @@ def coa():
 
 
 def test_when_load_chart_of_accounts_then_returns_account_object(coa, session):
-    resp = traded.accounts.load_chart_of_accounts(
-        filename=coa, session=session
-    )
+    resp = traded.load.chart_of_accounts(filename=coa, session=session)
     assert isinstance(resp, traded.models.Account)
 
 
@@ -27,7 +25,7 @@ def test_when_load_chart_of_accounts_then_account_count_increase_by_15(
     stmt = sa.select(sa.func.count(traded.models.Account.id))
     count_before = session.scalar(stmt)
 
-    traded.accounts.load_chart_of_accounts(filename=coa, session=session)
+    traded.load.chart_of_accounts(filename=coa, session=session)
     session.commit()
 
     count_after = session.scalar(stmt)
@@ -37,7 +35,7 @@ def test_when_load_chart_of_accounts_then_account_count_increase_by_15(
 def test_when_load_chart_of_accounts_then_account_dividends_exists(
     session, coa
 ):
-    traded.accounts.load_chart_of_accounts(filename=coa, session=session)
+    traded.load.chart_of_accounts(filename=coa, session=session)
     session.commit()
 
     Acc = traded.models.Account
@@ -47,7 +45,7 @@ def test_when_load_chart_of_accounts_then_account_dividends_exists(
 
 
 def test_when_load_chart_of_accounts_then_account_root_exists(session, coa):
-    traded.accounts.load_chart_of_accounts(filename=coa, session=session)
+    traded.load.chart_of_accounts(filename=coa, session=session)
     session.commit()
 
     Acc = traded.models.Account
@@ -59,7 +57,7 @@ def test_when_load_chart_of_accounts_then_account_root_exists(session, coa):
 def test_when_load_chart_of_accounts_then_account_dividends_has_revenue_parent(
     session, coa
 ):
-    traded.accounts.load_chart_of_accounts(filename=coa, session=session)
+    traded.load.chart_of_accounts(filename=coa, session=session)
     session.commit()
 
     Acc = traded.models.Account
@@ -72,7 +70,7 @@ def test_when_load_chart_of_accounts_then_account_dividends_has_revenue_parent(
 def test_when_load_chart_of_accounts_then_account_root_has_revenue_child(
     session, coa
 ):
-    traded.accounts.load_chart_of_accounts(filename=coa, session=session)
+    traded.load.chart_of_accounts(filename=coa, session=session)
     session.commit()
 
     Acc = traded.models.Account

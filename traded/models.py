@@ -1,4 +1,5 @@
 from decimal import Decimal
+from enum import Enum
 
 import sqlalchemy as sa
 import sqlalchemy.ext.declarative
@@ -41,6 +42,29 @@ class Account(Base):
         return a
 
 
+class AssetType(str, Enum):
+    currency = "currency"
+
+
+class Asset(Base):
+    __tablename__ = "asset"
+    id = sa.Column(sa.Integer, primary_key=True, index=True)
+    name = sa.Column(sa.String, unique=True, index=True, nullable=False)
+    type = sa.Column(sa.types.Enum(AssetType), index=True, nullable=False)
+    price_asset_id = sa.Column(
+        sa.Integer, sa.ForeignKey("asset.id"), nullable=True, index=True
+    )
+
+    price_asset = sa.orm.relationship("Asset", remote_side=[id])
+
+    @classmethod
+    def get_from_name(cls, name: str, session: sa.orm.Session) -> "Asset":
+        """Return an asset object from its name."""
+        stmt = sa.select(cls).where(cls.name == name)
+        result = session.scalar(stmt)
+        return result
+
+
 class EntryLine(Base):
     __tablename__ = "entry_line"
 
@@ -48,6 +72,10 @@ class EntryLine(Base):
     account_id = sa.Column(sa.Integer, sa.ForeignKey("account.id"), index=True)
     entry_id = sa.Column(sa.Integer, sa.ForeignKey("entry.id"), index=True)
     value = sa.Column(sa.Numeric(12, 6), nullable=False)
+    asset_id = sa.Column(sa.Integer, sa.ForeignKey("asset.id"), index=True)
+    quantity = sa.Column(sa.Numeric(12, 6), nullable=False)
+
+    asset = sa.orm.relationship("Asset")
 
     @classmethod
     def new(
@@ -55,13 +83,22 @@ class EntryLine(Base):
         *,
         account: Account,
         value: Decimal,
+        asset: Asset,
+        quantity: Decimal,
     ) -> "EntryLine":
-        o = cls(account_id=account.id, value=value)
+        o = cls(
+            account_id=account.id, value=value, asset=asset, quantity=quantity
+        )
         return o
 
     @classmethod
     def from_dict(cls, /, d: dict):
-        o = cls.new(account=d["account"], value=d["value"])
+        o = cls.new(
+            account=d["account"],
+            value=d["value"],
+            asset=d["asset"],
+            quantity=d["quantity"],
+        )
         return o
 
 
