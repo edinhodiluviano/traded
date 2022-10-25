@@ -1,10 +1,11 @@
 USD:
     type: currency
-    children:
-        BRL:
-            type: currency
-            children:
-                ITSA4:
-                    type: stock
-        BTC:
-            type: currency
+BRL:
+    type: currency
+    price_asset: USD
+ITSA4:
+    type: currency
+    price_asset: BRL
+BTC:
+    type: currency
+    price_asset: USD

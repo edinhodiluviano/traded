@@ -65,20 +65,26 @@ def assets(filename: Path, session: sa.orm.session) -> list[models.Asset]:
     """
     with open(filename) as f:
         assets_dict = yaml.safe_load(f)
-    asset_list = []
-    asset_list = _traverse_assets(assets_dict, None, asset_list, session)
+    assets = {}
+    for asset_name, asset_attrs in assets_dict.items():
+        asset_price_obj = _get_asset_price(asset_attrs, assets, session)
+        assets[asset_name] = models.Asset(
+            name=asset_name,
+            type=asset_attrs["type"],
+            price_asset=asset_price_obj,
+        )
+    asset_list = list(assets.values())
     session.add_all(asset_list)
     return asset_list
 
 
-def _traverse_assets(assets_dict, parent, asset_list, session):
-    for asset_name, attrs in assets_dict.items():
-        asset_obj = models.Asset(
-            name=asset_name, type=attrs["type"], price_asset=parent
-        )
-        asset_list.append(asset_obj)
-        if "children" in attrs:
-            asset_list = _traverse_assets(
-                attrs["children"], asset_obj, asset_list, session
-            )
-    return asset_list
+def _get_asset_price(asset_attrs, assets, session):
+    if "price_asset" not in asset_attrs:
+        return None
+    price_asset = asset_attrs["price_asset"]
+    price_asset_in_db = models.Asset.get_from_name(
+        name=price_asset, session=session
+    )
+    if price_asset_in_db is not None:
+        return price_asset_in_db
+    return assets.get(price_asset, None)
