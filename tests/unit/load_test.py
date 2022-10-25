@@ -7,18 +7,27 @@ import traded
 
 
 @pytest.fixture
-def coa():
+def this_file_dir():
     this_file = os.path.realpath(__file__)
     this_file_dir = os.path.dirname(this_file)
+    return this_file_dir
+
+
+@pytest.fixture
+def coa(this_file_dir):
     filename = this_file_dir + "/test_coa.yml"
     return filename
 
 
 @pytest.fixture
-def asset_file():
-    this_file = os.path.realpath(__file__)
-    this_file_dir = os.path.dirname(this_file)
+def asset_file(this_file_dir):
     filename = this_file_dir + "/test_assets.yml"
+    return filename
+
+
+@pytest.fixture
+def asset_file_2(this_file_dir):
+    filename = this_file_dir + "/test_assets_2.yml"
     return filename
 
 
@@ -138,3 +147,31 @@ def test_given_loaded_assets_when_get_assets_then_itsa4_price_asset_is_brl(
     result = session.scalar(stmt)
 
     assert result.price_asset.name == "BRL"
+
+
+def test_given_load_assets_1_when_load_assets_2_then_assets_count_increase_2(
+    session, asset_file, asset_file_2
+):
+    traded.load.assets(filename=asset_file, session=session)
+    session.commit()
+
+    stmt = sa.select(sa.func.count(traded.models.Asset.id))
+    count_before = session.scalar(stmt)
+
+    traded.load.assets(filename=asset_file_2, session=session)
+    session.commit()
+
+    count_after = session.scalar(stmt)
+    assert count_after == count_before + 2
+
+
+def test_given_load_assets_1_when_load_assets_2_then_bbdc4_price_asset_is_brl(
+    session, asset_file, asset_file_2
+):
+    traded.load.assets(filename=asset_file, session=session)
+    session.commit()
+    traded.load.assets(filename=asset_file_2, session=session)
+    session.commit()
+
+    bbdc4 = traded.models.Asset.get_from_name(name="BBDC4", session=session)
+    assert bbdc4.price_asset.name == "BRL"

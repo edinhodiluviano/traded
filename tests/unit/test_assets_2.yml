@@ -1,0 +1,6 @@
+BBDC4:
+    type: stock
+    price_asset: BRL
+PETR4:
+    type: stock
+    price_asset: BRL
