@@ -14,7 +14,7 @@ def this_file_dir():
 
 
 @pytest.fixture
-def coa(this_file_dir):
+def coa_file(this_file_dir):
     filename = this_file_dir + "/test_coa.yml"
     return filename
 
@@ -31,18 +31,20 @@ def asset_file_2(this_file_dir):
     return filename
 
 
-def test_when_load_chart_of_accounts_then_returns_account_object(coa, session):
-    resp = traded.load.chart_of_accounts(filename=coa, session=session)
+def test_when_load_chart_of_accounts_then_returns_account_object(
+    coa_file, session
+):
+    resp = traded.load.chart_of_accounts(filename=coa_file, session=session)
     assert isinstance(resp, traded.models.Account)
 
 
 def test_when_load_chart_of_accounts_then_account_count_increase_by_15(
-    session, coa
+    session, coa_file
 ):
     stmt = sa.select(sa.func.count(traded.models.Account.id))
     count_before = session.scalar(stmt)
 
-    traded.load.chart_of_accounts(filename=coa, session=session)
+    traded.load.chart_of_accounts(filename=coa_file, session=session)
     session.commit()
 
     count_after = session.scalar(stmt)
@@ -50,9 +52,9 @@ def test_when_load_chart_of_accounts_then_account_count_increase_by_15(
 
 
 def test_when_load_chart_of_accounts_then_account_dividends_exists(
-    session, coa
+    session, coa_file
 ):
-    traded.load.chart_of_accounts(filename=coa, session=session)
+    traded.load.chart_of_accounts(filename=coa_file, session=session)
     session.commit()
 
     Acc = traded.models.Account
@@ -61,8 +63,10 @@ def test_when_load_chart_of_accounts_then_account_dividends_exists(
     assert acc.name == "Dividends"
 
 
-def test_when_load_chart_of_accounts_then_account_root_exists(session, coa):
-    traded.load.chart_of_accounts(filename=coa, session=session)
+def test_when_load_chart_of_accounts_then_account_root_exists(
+    session, coa_file
+):
+    traded.load.chart_of_accounts(filename=coa_file, session=session)
     session.commit()
 
     Acc = traded.models.Account
@@ -72,9 +76,9 @@ def test_when_load_chart_of_accounts_then_account_root_exists(session, coa):
 
 
 def test_when_load_chart_of_accounts_then_account_dividends_has_revenue_parent(
-    session, coa
+    session, coa_file
 ):
-    traded.load.chart_of_accounts(filename=coa, session=session)
+    traded.load.chart_of_accounts(filename=coa_file, session=session)
     session.commit()
 
     Acc = traded.models.Account
@@ -85,9 +89,9 @@ def test_when_load_chart_of_accounts_then_account_dividends_has_revenue_parent(
 
 
 def test_when_load_chart_of_accounts_then_account_root_has_revenue_child(
-    session, coa
+    session, coa_file
 ):
-    traded.load.chart_of_accounts(filename=coa, session=session)
+    traded.load.chart_of_accounts(filename=coa_file, session=session)
     session.commit()
 
     Acc = traded.models.Account
