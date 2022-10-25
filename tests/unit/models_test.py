@@ -99,3 +99,8 @@ def test_given_entry_with_3_lines_when_save_then_entry_lines_increase_by_3(
 
     count_after = session.scalar(stmt)
     assert count_after == count_before + 3
+
+
+def test_account_object_has_no_balance_attribute():
+    acc = traded.models.Account.new(name="aaa")
+    assert not hasattr(acc, "balance")
