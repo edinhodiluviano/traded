@@ -14,6 +14,14 @@ def coa():
     return filename
 
 
+@pytest.fixture
+def asset_file():
+    this_file = os.path.realpath(__file__)
+    this_file_dir = os.path.dirname(this_file)
+    filename = this_file_dir + "/test_assets.yml"
+    return filename
+
+
 def test_when_load_chart_of_accounts_then_returns_account_object(coa, session):
     resp = traded.load.chart_of_accounts(filename=coa, session=session)
     assert isinstance(resp, traded.models.Account)
@@ -78,3 +86,55 @@ def test_when_load_chart_of_accounts_then_account_root_has_revenue_child(
     acc = session.scalar(stmt)
 
     assert "Revenue" in [child.name for child in acc.children]
+
+
+def test_when_load_assets_then_return_list(session, asset_file):
+    r = traded.load.assets(filename=asset_file, session=session)
+    assert isinstance(r, list)
+
+
+def test_when_load_assets_then_list_has_4_elements(session, asset_file):
+    r = traded.load.assets(filename=asset_file, session=session)
+    assert len(r) == 4
+
+
+def test_when_load_assets_then_list_elements_are_assets(session, asset_file):
+    r = traded.load.assets(filename=asset_file, session=session)
+    for elem in r:
+        assert isinstance(elem, traded.models.Asset)
+
+
+def test_when_load_assets_then_asset_count_increase_by_4(session, asset_file):
+    stmt = sa.select(sa.func.count(traded.models.Asset.id))
+    count_before = session.scalar(stmt)
+
+    traded.load.assets(filename=asset_file, session=session)
+    session.commit()
+
+    count_after = session.scalar(stmt)
+    assert count_after == count_before + 4
+
+
+def test_when_load_assets_then_BRL_is_available(session, asset_file):
+    traded.load.assets(filename=asset_file, session=session)
+    session.commit()
+
+    Asset = traded.models.Asset
+    stmt = sa.select(Asset).where(Asset.name == "BRL")
+    result = session.scalar(stmt)
+
+    assert isinstance(result, Asset)
+    assert result.name == "BRL"
+
+
+def test_given_loaded_assets_when_get_assets_then_itsa4_price_asset_is_brl(
+    session, asset_file
+):
+    traded.load.assets(filename=asset_file, session=session)
+    session.commit()
+
+    Asset = traded.models.Asset
+    stmt = sa.select(Asset).where(Asset.name == "ITSA4")
+    result = session.scalar(stmt)
+
+    assert result.price_asset.name == "BRL"

@@ -47,3 +47,38 @@ def _traverse_accounts(account, parent):
                 acc = models.Account.new(name=key, parent=parent, entry=False)
                 yield acc
                 yield from _traverse_accounts(value, acc)
+
+
+def assets(filename: Path, session: sa.orm.session) -> list[models.Asset]:
+    """
+    Load an Asset yaml file.
+
+    Example:
+    USD:
+        type: currency
+    BRL:
+        type: currency
+        price_asset: USD
+    ITSA4:
+        type: stock
+        price_asset: BRL
+    """
+    with open(filename) as f:
+        assets_dict = yaml.safe_load(f)
+    asset_list = []
+    asset_list = _traverse_assets(assets_dict, None, asset_list, session)
+    session.add_all(asset_list)
+    return asset_list
+
+
+def _traverse_assets(assets_dict, parent, asset_list, session):
+    for asset_name, attrs in assets_dict.items():
+        asset_obj = models.Asset(
+            name=asset_name, type=attrs["type"], price_asset=parent
+        )
+        asset_list.append(asset_obj)
+        if "children" in attrs:
+            asset_list = _traverse_assets(
+                attrs["children"], asset_obj, asset_list, session
+            )
+    return asset_list

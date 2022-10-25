@@ -44,6 +44,7 @@ class Account(Base):
 
 class AssetType(str, Enum):
     currency = "currency"
+    stock = "stock"
 
 
 class Asset(Base):
