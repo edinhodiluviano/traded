@@ -31,7 +31,7 @@ x-depend: &depends
 services:
 
     database:
-        image: postgres:15.0-alpine3.16
+        image: postgres:15.2-alpine3.17
         container_name: database
         ports:
             - "127.0.0.1:5432:5432/tcp"
