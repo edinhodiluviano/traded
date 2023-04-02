@@ -2,9 +2,9 @@ from decimal import Decimal
 from enum import Enum
 
 import sqlalchemy as sa
-import sqlalchemy.ext.declarative
+import sqlalchemy.orm
 
-Base = sa.ext.declarative.declarative_base()
+Base = sa.orm.declarative_base()
 
 
 class Account(Base):
