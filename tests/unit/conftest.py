@@ -13,6 +13,6 @@ def settings():
 
 
 @pytest.fixture(scope="function", autouse=True)
-def session():
+def session(settings):
     with database.create_session() as session:
         yield session
