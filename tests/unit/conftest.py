@@ -14,5 +14,5 @@ def settings():
 
 @pytest.fixture(scope="function", autouse=True)
 def session(settings):
-    with database.create_session() as session:
-        yield session
+    with database.create_session() as _session:
+        yield _session
