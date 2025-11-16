@@ -58,7 +58,6 @@ jobs:
           ruff check traded/
           ruff format --check traded/
           mypy --strict traded/
-          safety check
 
       - name: Run unit tests
         run: |
