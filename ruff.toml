@@ -11,6 +11,7 @@ ignore = [
     "B905",     # `zip()` without an explicit `strict=` parameter
     "COM812",   # Trailing comma missing
     "C4",       # flake8-comprehensions
+    "D105",     # Missing docstring in magic method
     "D107",     # Missing docstring in `__init__`
     "D200",     # One-line docstring should fit on one line
     "D202",     # No blank lines allowed after function docstring
