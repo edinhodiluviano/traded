@@ -17,7 +17,7 @@ import functools
 import logging
 from collections.abc import Callable, Iterator
 from textwrap import dedent
-from typing import Any, TypeAlias, cast
+from typing import Any, TypeAlias
 
 import sqlalchemy as sa
 from pydantic_settings import BaseSettings, SettingsConfigDict
